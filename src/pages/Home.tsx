@@ -1,12 +1,14 @@
 import {
   Play, Clock, Target, Zap, ChevronRight, BookOpen,
   Trophy, BarChart3, Calendar, ArrowRight, CheckCircle2,
-  Brain, Flame, Timer, Code2, Sparkles
+  Brain, Flame, Timer, Code2, Sparkles, UserPlus
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import ProfileCard from '../components/common/ProfileCard';
 import ExternalLink from '../components/common/ExternalLink';
+import NotificationPermissionPrompt from '../components/notifications/NotificationPermissionPrompt';
 import { soundManager } from '../utils/soundManager';
+import { getTimeGreeting } from '../utils/greetingUtils';
 
 export default function HomePage() {
   const { 
@@ -15,8 +17,7 @@ export default function HomePage() {
   } = useAppStore();
   
   const now = new Date();
-  const hour = now.getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const timeGreeting = getTimeGreeting(userName);
   
   const dueReviews = reviews.filter(r => new Date(r.nextReview) <= now);
   const upcomingOpps = opportunities
@@ -44,43 +45,73 @@ export default function HomePage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+      {/* Notification Permission Banner */}
+      <div className="pt-4">
+        <NotificationPermissionPrompt />
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-8 w-full min-w-0">
         
-        {/* Greeting & Profile Card */}
-        <div className="space-y-4 animate-fade-in">
+        {/* Time-Based Greeting & Profile Card */}
+        <div className="space-y-4 animate-fade-in min-w-0">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-serif text-text-primary tracking-tight font-normal">
-              {greeting.toUpperCase()}, <span className="text-paper-white font-serif">{userName.toUpperCase()}</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-base sm:text-lg">{timeGreeting.emoji}</span>
+              <span className="text-2xs font-semibold uppercase tracking-wider text-accent-copper">
+                {timeGreeting.salutation}
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-serif text-text-primary tracking-tight font-normal break-words">
+              {isProfileConnected && userName ? (
+                <>
+                  {timeGreeting.title.split(',')[0]}, <span className="text-paper-white font-serif">{userName.toUpperCase()}</span>
+                </>
+              ) : (
+                <>
+                  WELCOME, <span className="text-paper-white font-serif">DEVELOPER</span>
+                </>
+              )}
             </h1>
             <p className="text-xs text-text-secondary mt-1 font-light italic">
-              “Let’s get one useful thing done.”
+              “{timeGreeting.subtitle}”
             </p>
           </div>
 
-          {/* Persistent Personal Profile Card */}
-          <ProfileCard />
-
-          {/* Quick Connect Prompt if not configured */}
+          {/* Quick Sign Up Card for New Users / Guests */}
           {!isProfileConnected && (
-            <div className="bg-surface-2 border border-dashed border-accent-copper/40 rounded-[10px] p-3.5 flex items-center justify-between gap-3 animate-fade-in">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-accent-copper/10 text-accent-copper flex items-center justify-center shrink-0">
-                  <Sparkles size={14} />
+            <div className="bg-gradient-to-r from-accent-copper/15 via-surface-2 to-accent-blue/15 border border-accent-copper/40 rounded-[14px] p-4 sm:p-5 relative overflow-hidden shadow-xl animate-slide-up">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-accent-copper/20 text-accent-copper border border-accent-copper/30 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                    <Sparkles size={20} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xs font-bold uppercase tracking-wider text-accent-copper">Start Here</span>
+                      <span className="text-2xs px-2 py-0.5 rounded-full bg-accent-copper/20 text-accent-copper font-medium">New Account</span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-text-primary mt-0.5">
+                      Create your account & personalize your OS
+                    </h3>
+                    <p className="text-xs text-text-tertiary mt-1 max-w-xl">
+                      Sign up with your name and link your GitHub & LeetCode to track real problem streaks, personalized AI hints, and tailored career targets.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-text-primary">Personalize your developer workspace</p>
-                  <p className="text-2xs text-text-tertiary">Connect your own GitHub & LeetCode usernames to track your own real stats, problems, and links.</p>
-                </div>
+                <button
+                  onClick={() => setLoginModalOpen(true)}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-accent-copper hover:bg-copper-accent-hover text-surface-0 font-bold text-xs sm:text-sm transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 shrink-0"
+                >
+                  <UserPlus size={16} />
+                  <span>Sign Up / Create Profile</span>
+                  <ArrowRight size={15} />
+                </button>
               </div>
-              <button
-                onClick={() => setLoginModalOpen(true)}
-                className="px-3.5 py-1.5 rounded-full bg-paper-white text-surface-0 hover:bg-bone text-xs font-semibold shrink-0 transition-all active:scale-[0.98] shadow-sm flex items-center gap-1.5"
-              >
-                <span>Login / Setup</span>
-                <span className="text-accent-copper">→</span>
-              </button>
             </div>
           )}
+
+          {/* Persistent Personal Profile Card */}
+          <ProfileCard />
         </div>
 
         {/* NEXT MOVE — Primary CTA */}
@@ -130,7 +161,7 @@ export default function HomePage() {
         {/* TODAY Stats */}
         <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
           <h3 className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-3">Today</h3>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard 
               icon={<Clock size={16} />} 
               label="Learning" 
@@ -194,7 +225,7 @@ export default function HomePage() {
               View roadmap <ChevronRight size={12} />
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {currentlyLearning.slice(0, 4).map(skill => (
               <button
                 key={skill.id}
@@ -275,7 +306,7 @@ export default function HomePage() {
             </button>
           </div>
           <div className="bg-surface-2 border border-border-default rounded-xl p-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {['DSA', 'Web Development', 'AI/ML'].map(cat => {
                 const catSkills = skills.filter(s => s.category === cat);
                 const mastered = catSkills.filter(s => s.status === 'mastered').length;

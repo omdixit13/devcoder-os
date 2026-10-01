@@ -58,31 +58,31 @@ export default function OpportunitiesPage() {
   ];
 
   return (
-    <div className="h-full flex">
+    <div className="h-full flex overflow-hidden min-w-0">
       {/* Main List */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full min-w-0">
           {/* Header */}
           <div className="mb-6 animate-fade-in">
             <h1 className="text-xl font-semibold text-text-primary mb-1">Opportunities</h1>
-            <p className="text-sm text-text-tertiary">Contests, hackathons, internships, and programs.</p>
+            <p className="text-xs sm:text-sm text-text-tertiary">Contests, hackathons, internships, and programs.</p>
           </div>
 
           {/* Search + Filters */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 flex items-center gap-2 bg-surface-2 border border-border-default rounded-lg px-3 py-2">
-              <Search size={14} className="text-text-tertiary" />
+              <Search size={14} className="text-text-tertiary shrink-0" />
               <input
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search opportunities..."
-                className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none"
+                className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none min-w-0"
               />
             </div>
           </div>
 
-          <div className="flex gap-1 mb-6 bg-surface-2 rounded-lg p-1 w-fit flex-wrap">
+          <div className="flex gap-1 mb-6 bg-surface-2 rounded-lg p-1 w-full sm:w-fit overflow-x-auto no-scrollbar">
             {filters.map(f => (
               <button
                 key={f.key}
@@ -195,8 +195,13 @@ export default function OpportunitiesPage() {
 
       {/* Detail Panel */}
       {selectedOpp && (
-        <div className="w-[360px] bg-surface-1 border-l border-border-default overflow-y-auto animate-slide-in-right">
-          <div className="p-5 space-y-5">
+        <>
+          <div
+            onClick={() => setSelectedOpp(null)}
+            className="fixed inset-0 bg-surface-0/60 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+          />
+          <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] bg-surface-1 border-l border-border-default overflow-y-auto animate-slide-in-right flex flex-col shadow-2xl">
+          <div className="p-5 space-y-5 flex-1">
             {/* Header */}
             <div>
               <div className="flex items-center justify-between">
@@ -312,6 +317,7 @@ export default function OpportunitiesPage() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Preparation Modal */}

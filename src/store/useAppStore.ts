@@ -176,12 +176,12 @@ export const useAppStore = create<AppState>()(
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
       
       // User Profile & Authentication
-      userName: 'Om Dixit',
-      githubProfileUrl: 'https://github.com/omdixit13',
-      leetcodeProfileUrl: 'https://leetcode.com/u/omdixit13',
-      userRole: 'B.Tech CSE Student',
-      userCollege: 'Computer Science & Engineering',
-      isProfileConnected: true,
+      userName: '',
+      githubProfileUrl: '',
+      leetcodeProfileUrl: '',
+      userRole: 'Aspiring Software Engineer',
+      userCollege: '',
+      isProfileConnected: false,
       loginModalOpen: false,
       setLoginModalOpen: (open) => set({ loginModalOpen: open }),
       connectAccounts: ({ name, github, leetcode, role, college }) => {
@@ -190,12 +190,15 @@ export const useAppStore = create<AppState>()(
         const cleanName = name?.trim() || 'Developer';
         soundManager.play('milestone');
         triggerConfetti();
+        try {
+          localStorage.setItem('devcareer_custom_user', 'true');
+        } catch {}
         set({
           userName: cleanName,
           githubProfileUrl: ghUrl,
           leetcodeProfileUrl: lcUrl,
-          userRole: role?.trim() || 'B.Tech CSE Student',
-          userCollege: college?.trim() || 'Computer Science & Engineering',
+          userRole: role?.trim() || 'Software Engineer Candidate',
+          userCollege: college?.trim() || '',
           isProfileConnected: true,
           loginModalOpen: false,
         });
@@ -205,12 +208,15 @@ export const useAppStore = create<AppState>()(
       },
       disconnectAccounts: () => {
         soundManager.play('click');
+        try {
+          localStorage.removeItem('devcareer_custom_user');
+        } catch {}
         set({
-          userName: 'Developer',
+          userName: '',
           githubProfileUrl: '',
           leetcodeProfileUrl: '',
-          userRole: 'Developer Candidate',
-          userCollege: 'Self-Taught / College',
+          userRole: 'Aspiring Software Engineer',
+          userCollege: '',
           isProfileConnected: false,
           leetcodeStats: null,
         });
@@ -477,7 +483,7 @@ export const useAppStore = create<AppState>()(
         {
           id: 'welcome',
           role: 'bhai',
-          content: 'Namaste Om! Main Bhai hoon — aapka personal learning companion. Kuch bhi seekhna ho, kisi bhi concept mein help chahiye, ya career guidance — bas pooch lijiye. Chaliye, aaj kya karte hain?',
+          content: 'Namaste dost! Main Bhai hoon — aapka personal learning companion aur coding coach. DSA, system design, debugging ya career path — bas pooch lijiye. Chaliye, aaj kya solid seekhte hain?',
           timestamp: new Date().toISOString(),
           type: 'text',
         }
@@ -616,19 +622,17 @@ export const useAppStore = create<AppState>()(
         syncedSolutions: state.syncedSolutions,
         leetcodeStats: state.leetcodeStats,
       }),
-      version: 3,
+      version: 4,
       migrate: (persistedState: any) => {
         if (!persistedState) return {};
-        if (!persistedState.githubProfileUrl || persistedState.githubProfileUrl.includes('om-dev')) {
-          persistedState.githubProfileUrl = 'https://github.com/omdixit13';
+        // If the stored profile was the hardcoded legacy test account, reset it so new user can sign up
+        const isCustomUser = typeof window !== 'undefined' && localStorage.getItem('devcareer_custom_user') === 'true';
+        if (!isCustomUser && (persistedState.userName === 'Om Dixit' || persistedState.userName === 'Om')) {
+          persistedState.userName = '';
+          persistedState.githubProfileUrl = '';
+          persistedState.leetcodeProfileUrl = '';
+          persistedState.isProfileConnected = false;
         }
-        if (!persistedState.leetcodeProfileUrl || persistedState.leetcodeProfileUrl.includes('om-dev')) {
-          persistedState.leetcodeProfileUrl = 'https://leetcode.com/u/omdixit13';
-        }
-        if (!persistedState.userName || persistedState.userName === 'Om' || persistedState.userName === 'Developer') {
-          persistedState.userName = 'Om Dixit';
-        }
-        persistedState.isProfileConnected = true;
         return persistedState;
       },
     }

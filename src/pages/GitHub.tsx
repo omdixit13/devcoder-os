@@ -46,46 +46,48 @@ export default function GitHubPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 w-full min-w-0">
         <div className="animate-fade-in">
           <h1 className="text-xl font-semibold text-text-primary mb-1">GitHub</h1>
-          <p className="text-sm text-text-tertiary">Track your repositories, contributions, and developer profile.</p>
+          <p className="text-xs sm:text-sm text-text-tertiary">Track your repositories, contributions, and developer profile.</p>
         </div>
 
         {/* Profile Card */}
         <ProfileCard />
 
         {/* Connection Status */}
-        <div className="bg-surface-2 border border-border-default rounded-[10px] p-5 flex items-center gap-4 animate-slide-up">
-          <div className="w-12 h-12 rounded-full bg-surface-4 flex items-center justify-center">
-            <GithubIcon size={24} className="text-text-primary" />
+        <div className="bg-surface-2 border border-border-default rounded-[10px] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 animate-slide-up">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-surface-4 flex items-center justify-center shrink-0">
+              <GithubIcon size={22} className="text-text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-text-primary">
+                {handle ? 'GitHub Connected' : 'Connect Your GitHub Profile'}
+              </h3>
+              <p className="text-2xs text-text-tertiary">
+                {handle ? (
+                  <>
+                    <span className="text-accent-copper font-medium">@{handle}</span> · Active developer link
+                  </>
+                ) : (
+                  'Link your GitHub username to track repos and commits directly.'
+                )}
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-semibold text-text-primary">
-              {handle ? 'GitHub Connected' : 'Connect Your GitHub Profile'}
-            </h3>
-            <p className="text-2xs text-text-tertiary">
-              {handle ? (
-                <>
-                  <span className="text-accent-copper font-medium">@{handle}</span> · Active developer link
-                </>
-              ) : (
-                'Link your GitHub username to track repos and commits directly.'
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {githubProfileUrl ? (
               <>
                 <button
                   onClick={() => setLoginModalOpen(true)}
-                  className="px-3 py-2 rounded-full hover:bg-surface-3 text-text-tertiary hover:text-text-secondary text-xs transition-colors"
+                  className="px-3 py-1.5 rounded-full hover:bg-surface-3 text-text-tertiary hover:text-text-secondary text-xs transition-colors"
                 >
                   Change Account
                 </button>
                 <ExternalLink
                   href={githubProfileUrl}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-3 hover:bg-surface-4 text-text-primary border border-border-default text-xs font-medium transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-surface-3 hover:bg-surface-4 text-text-primary border border-border-default text-xs font-medium transition-colors"
                   tooltipText={`Open https://github.com/${handle}`}
                 >
                   Open Profile
@@ -94,7 +96,7 @@ export default function GitHubPage() {
             ) : (
               <button
                 onClick={() => setLoginModalOpen(true)}
-                className="px-4 py-2 rounded-full bg-paper-white text-surface-0 hover:bg-bone text-xs font-semibold transition-all shadow-sm"
+                className="px-4 py-2 rounded-full bg-paper-white text-surface-0 hover:bg-bone text-xs font-semibold transition-all shadow-sm w-full sm:w-auto"
               >
                 + Connect GitHub
               </button>
@@ -103,7 +105,7 @@ export default function GitHubPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up" style={{ animationDelay: '100ms' }}>
           <div className="bg-surface-2 border border-border-default rounded-xl p-3 text-center">
             <span className="text-lg font-semibold text-text-primary">12</span>
             <span className="block text-2xs text-text-tertiary">Repositories</span>

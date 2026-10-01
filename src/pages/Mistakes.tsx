@@ -12,10 +12,10 @@ export default function MistakesPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 w-full min-w-0">
         <div className="animate-fade-in">
           <h1 className="text-xl font-semibold text-text-primary mb-1">Mistake Notebook</h1>
-          <p className="text-sm text-text-tertiary">Learn from your mistakes. Track patterns. Improve.</p>
+          <p className="text-xs sm:text-sm text-text-tertiary">Learn from your mistakes. Track patterns. Improve.</p>
         </div>
 
         {/* Recurring Mistakes */}

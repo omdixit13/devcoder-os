@@ -21,7 +21,7 @@
 }
 
 /* ===== Base Reset ===== */
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -29,8 +29,12 @@
 
 html, body, #root {
   height: 100%;
+  min-height: 100dvh;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -40,6 +44,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
+  width: 100%;
+  max-width: 100%;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+p, span, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: anywhere;
 }
 
 /* ===== Button Feedback (Micro-interactions) ===== */

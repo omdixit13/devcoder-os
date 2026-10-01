@@ -36,7 +36,7 @@ const bottomNavItems: NavItem[] = [
 ];
 
 export default function Sidebar() {
-  const { currentPage, setCurrentPage, reviews, userName, githubProfileUrl, leetcodeProfileUrl, setLoginModalOpen } = useAppStore();
+  const { currentPage, setCurrentPage, reviews, userName, githubProfileUrl, leetcodeProfileUrl, isProfileConnected, setLoginModalOpen } = useAppStore();
   const [collapsed, setCollapsed] = React.useState(false);
   
   const dueReviews = reviews.filter(r => new Date(r.nextReview) <= new Date()).length;
@@ -133,11 +133,15 @@ export default function Sidebar() {
               title="Click to Connect Accounts or Switch Profile"
             >
               <div className="w-6 h-6 rounded-full bg-surface-4 border border-border-subtle flex items-center justify-center text-text-primary text-2xs font-bold shrink-0">
-                {(userName || 'D').slice(0, 2).toUpperCase()}
+                {isProfileConnected && userName ? userName.slice(0, 2).toUpperCase() : '✦'}
               </div>
               <div className="min-w-0">
-                <span className="text-xs font-medium text-text-primary truncate block leading-none">{userName || 'Developer'}</span>
-                <span className="text-2xs text-accent-copper leading-tight">Switch Profile</span>
+                <span className="text-xs font-medium text-text-primary truncate block leading-none">
+                  {isProfileConnected && userName ? userName : 'Sign Up / Login'}
+                </span>
+                <span className="text-2xs text-accent-copper leading-tight">
+                  {isProfileConnected ? 'Manage Profile' : 'Claim Workspace'}
+                </span>
               </div>
             </button>
             <div className="flex items-center gap-1 shrink-0 ml-1">

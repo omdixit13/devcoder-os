@@ -140,16 +140,16 @@ export default function CareerCompassPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 w-full min-w-0">
         
         {/* ========================================================
             STAGE 1: WELCOME SCREEN
            ======================================================== */}
         {stage === 'welcome' && (
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-6 sm:space-y-8 animate-fade-in min-w-0">
             {/* Header */}
             <div>
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="text-2xs font-semibold text-accent-copper uppercase tracking-wider">
                   Self-Discovery Engine
                 </span>
@@ -157,11 +157,11 @@ export default function CareerCompassPage() {
                 <span className="text-2xs text-text-tertiary">14 Questions · 5 Minutes</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl font-serif text-text-primary tracking-tight font-normal mb-3">
+              <h1 className="text-3xl sm:text-5xl font-serif text-text-primary tracking-tight font-normal mb-3 break-words">
                 CAREER COMPASS
               </h1>
 
-              <p className="text-lg text-text-secondary max-w-2xl font-light leading-relaxed">
+              <p className="text-base sm:text-lg text-text-secondary max-w-2xl font-light leading-relaxed">
                 “Where does your curiosity naturally pull you?”
               </p>
 
@@ -177,7 +177,7 @@ export default function CareerCompassPage() {
             <div>
               <button
                 onClick={handleStart}
-                className="bg-paper-white hover:bg-white/90 text-obsidian px-7 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.98] shadow-md flex items-center gap-2 group"
+                className="bg-paper-white hover:bg-white/90 text-obsidian px-7 py-3 rounded-full text-sm font-semibold transition-all active:scale-[0.98] shadow-md flex items-center justify-center gap-2 group w-full sm:w-auto"
               >
                 <span>START ASSESSMENT</span>
                 <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />

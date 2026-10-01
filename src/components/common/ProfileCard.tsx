@@ -115,8 +115,8 @@ export default function ProfileCard({ compact = false, className = '' }: Profile
             )}
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-2xs font-semibold text-accent-copper uppercase tracking-wider">
                 {displayName.toUpperCase()} / USER PROFILE
               </span>

@@ -63,9 +63,9 @@ export default function LeetCodePage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 w-full min-w-0">
         {/* Header */}
-        <div className="flex items-start justify-between animate-fade-in">
+        <div className="flex items-start justify-between animate-fade-in gap-3">
           <div>
             <h1 className="text-xl font-semibold text-text-primary mb-1">LeetCode</h1>
             <p className="text-sm text-text-tertiary">Track contests, live solved statistics, and competitive programming.</p>
@@ -157,7 +157,7 @@ export default function LeetCodePage() {
         ) : null}
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-4 gap-3 animate-slide-up">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up">
           <div className="bg-surface-2 border border-border-default rounded-xl p-4 text-center">
             <span className="text-2xl font-bold text-text-primary font-mono">{solvedByDifficulty.total}</span>
             <span className="block text-2xs text-text-tertiary mt-1">Total Solved</span>
@@ -256,7 +256,7 @@ export default function LeetCodePage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3 animate-slide-up" style={{ animationDelay: '300ms' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <button
             onClick={() => setCurrentPage('practice')}
             className="bg-surface-2 border border-border-default rounded-xl p-4 hover:border-border-strong hover:bg-surface-3 transition-all flex items-center gap-3 group"

@@ -82,27 +82,27 @@ export default function LearningPage() {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Return to Coding Lab Banner (Phase 10) */}
       {selectedProblem && labView === 'problem' && (
-        <div className="bg-accent-blue/10 border-b border-accent-blue/20 px-4 py-2 flex items-center justify-between shrink-0 animate-fade-in">
-          <div className="flex items-center gap-2 text-2xs text-accent-blue">
-            <Code2 size={14} />
-            <span>Currently studying concept for Coding Lab problem: <strong className="text-white">{selectedProblem.title}</strong></span>
+        <div className="bg-accent-blue/10 border-b border-accent-blue/20 px-3 sm:px-4 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 animate-fade-in">
+          <div className="flex items-center gap-2 text-2xs text-accent-blue min-w-0">
+            <Code2 size={14} className="shrink-0" />
+            <span className="truncate">Currently studying concept for: <strong className="text-white">{selectedProblem.title}</strong></span>
           </div>
           <button
             onClick={() => {
               soundManager.play('navigation');
               setCurrentPage('codinglab');
             }}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-blue text-white text-2xs font-semibold hover:bg-accent-blue/90 transition-all shadow-sm"
+            className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-accent-blue text-white text-2xs font-semibold hover:bg-accent-blue/90 transition-all shadow-sm shrink-0 w-full sm:w-auto"
           >
             <ArrowLeft size={12} />
-            Return to Problem ({selectedProblem.title})
+            <span>Return to Problem</span>
           </button>
         </div>
       )}
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left: Skill/Concept List */}
-        <div className="w-[260px] bg-surface-1 border-r border-border-default overflow-y-auto shrink-0 flex flex-col justify-between">
+      <div className="flex-1 flex overflow-hidden min-w-0">
+        {/* Left: Skill/Concept List (Desktop Only) */}
+        <div className="hidden md:flex w-[260px] bg-surface-1 border-r border-border-default overflow-y-auto shrink-0 flex-col justify-between">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-text-primary">Learning</h2>
@@ -208,8 +208,47 @@ export default function LearningPage() {
       {/* Center: Topic Workspace */}
       <div className="flex-1 overflow-y-auto">
         {selectedConcept ? (
-          <div className="max-w-4xl mx-auto px-8 py-8 space-y-6 animate-fade-in">
-            
+          <div className="max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6 animate-fade-in w-full min-w-0">
+            {/* Mobile Topic Selector (Visible on < md screens) */}
+            <div className="md:hidden bg-surface-2 border border-border-default rounded-[10px] p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-3xs uppercase tracking-wider font-semibold text-accent-copper">Active Topic</span>
+                <span className="text-3xs text-text-tertiary">{skillObj?.name}</span>
+              </div>
+              <select
+                value={effectiveSkillId}
+                onChange={e => {
+                  const sId = e.target.value;
+                  setSelectedSkillId(sId);
+                  const matching = concepts.filter(c => c.skillId === sId);
+                  if (matching.length > 0) setSelectedConceptId(matching[0].id);
+                  else setSelectedConceptId(`${sId}-overview`);
+                }}
+                className="w-full bg-surface-3 border border-border-default rounded-lg px-3 py-2 text-xs text-text-primary outline-none focus:border-border-strong cursor-pointer"
+              >
+                {learningSkills.map(s => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.category})</option>
+                ))}
+              </select>
+              {skillConcepts.length > 1 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+                  {skillConcepts.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedConceptId(c.id)}
+                      className={`px-2.5 py-1 rounded-full text-3xs whitespace-nowrap transition-all shrink-0 ${
+                        selectedConcept?.id === c.id
+                          ? 'bg-accent-copper/20 text-accent-copper border border-accent-copper/40 font-semibold'
+                          : 'bg-surface-3 text-text-tertiary'
+                      }`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Header: Section 30 */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">

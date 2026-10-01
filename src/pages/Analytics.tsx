@@ -43,14 +43,14 @@ export default function AnalyticsPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 w-full min-w-0">
         <div className="animate-fade-in">
           <h1 className="text-xl font-semibold text-text-primary mb-1">Analytics</h1>
-          <p className="text-sm text-text-tertiary">Your learning journey at a glance.</p>
+          <p className="text-xs sm:text-sm text-text-tertiary">Your learning journey at a glance.</p>
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-5 gap-3 animate-slide-up">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 animate-slide-up">
           {[
             { icon: <Target size={16} />, label: 'Problems Solved', value: solvedCount, color: 'text-accent-green' },
             { icon: <CheckCircle2 size={16} />, label: 'Skills Mastered', value: masteredSkills, color: 'text-accent-blue' },

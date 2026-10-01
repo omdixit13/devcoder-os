@@ -9,6 +9,7 @@ import ExternalLink from '../components/common/ExternalLink';
 import { soundManager } from '../utils/soundManager';
 import { triggerConfetti } from '../utils/confetti';
 import { normalizeProfileUrl } from '../utils/urlValidator';
+import { requestNotificationPermission, sendNotification } from '../utils/notificationService';
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState('profile');
@@ -76,9 +77,9 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="h-full flex">
-      {/* Settings Nav */}
-      <div className="w-[220px] bg-surface-1 border-r border-border-default p-4 shrink-0">
+    <div className="h-full flex overflow-hidden min-w-0">
+      {/* Settings Nav (Desktop Only) */}
+      <div className="hidden md:block w-[220px] bg-surface-1 border-r border-border-default p-4 shrink-0">
         <h2 className="text-sm font-semibold text-text-primary mb-4">Settings</h2>
         <div className="space-y-0.5">
           {sections.map(s => (
@@ -104,8 +105,29 @@ export default function SettingsPage() {
       </div>
 
       {/* Settings Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-8 py-8 space-y-6">
+      <div className="flex-1 overflow-y-auto min-w-0">
+        <div className="max-w-2xl mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6 w-full min-w-0">
+
+          {/* Mobile Settings Section Tabs */}
+          <div className="md:hidden flex items-center gap-1 border-b border-border-default pb-3 overflow-x-auto no-scrollbar">
+            {sections.map(s => (
+              <button
+                key={s.id}
+                onClick={() => {
+                  soundManager.play('buttonClick');
+                  setActiveSection(s.id);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
+                  activeSection === s.id
+                    ? 'bg-accent-copper/20 text-accent-copper border border-accent-copper/40 font-semibold'
+                    : 'bg-surface-2 text-text-tertiary hover:text-text-secondary'
+                }`}
+              >
+                <span>{s.icon}</span>
+                <span>{s.label}</span>
+              </button>
+            ))}
+          </div>
 
           {/* SECTION: PROFILE & LINKS */}
           {activeSection === 'profile' && (
@@ -391,10 +413,49 @@ export default function SettingsPage() {
           {activeSection === 'notifications' && (
             <div className="space-y-6 animate-fade-in">
               <div>
-                <h3 className="text-lg font-semibold text-text-primary mb-1">Notifications</h3>
-                <p className="text-xs text-text-tertiary">Control what alerts you receive.</p>
+                <h3 className="text-lg font-semibold text-text-primary mb-1">Notifications & Alerts</h3>
+                <p className="text-xs text-text-tertiary">Control what alerts you receive and manage Android & Web push permissions.</p>
               </div>
-              <div className="bg-surface-2 border border-border-default rounded-[10px] p-5 space-y-3">
+
+              {/* System Permission Card */}
+              <div className="bg-surface-2 border border-border-default rounded-[10px] p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border-subtle">
+                  <div>
+                    <h4 className="text-xs font-semibold text-text-primary">System Notification Permission</h4>
+                    <p className="text-2xs text-text-tertiary mt-0.5">Required for background reminders, contest countdowns, and streak alerts.</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={async () => {
+                        const granted = await requestNotificationPermission();
+                        if (granted) {
+                          soundManager.play('milestone');
+                          alert('Notifications enabled successfully!');
+                        } else {
+                          alert('Notifications were not granted. Please check browser or device settings.');
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-accent-blue hover:bg-blue-600 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Bell size={13} />
+                      <span>Request Permission</span>
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const sent = await sendNotification('DevCareer Test Alert 🔔', 'Notifications are working perfectly on your device!');
+                        if (sent) {
+                          soundManager.play('taskCompleted');
+                        } else {
+                          alert('Please enable notifications first using the button on the left.');
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-surface-3 hover:bg-surface-4 text-text-secondary hover:text-text-primary text-xs font-medium border border-border-default transition-colors"
+                    >
+                      Test Alert
+                    </button>
+                  </div>
+                </div>
+
                 <SettingRow title="Review Reminders" description="Get notified when concepts are due for review">
                   <Toggle checked={true} onChange={() => {}} />
                 </SettingRow>

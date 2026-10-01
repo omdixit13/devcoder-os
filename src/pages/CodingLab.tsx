@@ -101,62 +101,62 @@ function CodingLabHome() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 w-full min-w-0">
         {/* Header / Hero */}
-        <div className="flex items-start justify-between">
-          <div className="animate-fade-in">
-            <h1 className="text-2xl font-semibold text-text-primary mb-1 flex items-center gap-2">
-              <Terminal size={24} className="text-accent-blue" />
-              Coding Lab
+        <div className="flex items-start justify-between gap-3">
+          <div className="animate-fade-in min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-1 flex items-center gap-2">
+              <Terminal size={22} className="text-accent-blue shrink-0" />
+              <span>Coding Lab</span>
             </h1>
-            <p className="text-sm text-text-tertiary">Practice. Run. Debug. Improve.</p>
+            <p className="text-xs sm:text-sm text-text-tertiary">Practice. Run. Debug. Improve.</p>
           </div>
           <button
             onClick={() => setShowContestModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent-copper/15 border border-accent-copper/30 text-accent-copper text-xs font-medium hover:bg-accent-copper/25 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-accent-copper/15 border border-accent-copper/30 text-accent-copper text-xs font-medium hover:bg-accent-copper/25 transition-all shadow-sm shrink-0"
           >
             <Trophy size={14} />
-            Virtual Contest
+            <span className="hidden sm:inline">Virtual</span> Contest
           </button>
         </div>
 
         {/* Stats Strip */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-surface-2 border border-border-default rounded-[10px] p-4">
-            <div className="text-2xs text-text-tertiary uppercase tracking-wider mb-1">Solved</div>
-            <div className="text-xl font-semibold text-accent-green">{solvedCount}</div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="bg-surface-2 border border-border-default rounded-[10px] p-3 sm:p-4">
+            <div className="text-3xs sm:text-2xs text-text-tertiary uppercase tracking-wider mb-1">Solved</div>
+            <div className="text-lg sm:text-xl font-semibold text-accent-green">{solvedCount}</div>
           </div>
-          <div className="bg-surface-2 border border-border-default rounded-[10px] p-4">
-            <div className="text-2xs text-text-tertiary uppercase tracking-wider mb-1">Attempted</div>
-            <div className="text-xl font-semibold text-text-primary">
+          <div className="bg-surface-2 border border-border-default rounded-[10px] p-3 sm:p-4">
+            <div className="text-3xs sm:text-2xs text-text-tertiary uppercase tracking-wider mb-1">Attempted</div>
+            <div className="text-lg sm:text-xl font-semibold text-text-primary">
               {new Set(attempts.map(a => a.problemId)).size}
             </div>
           </div>
-          <div className="bg-surface-2 border border-border-default rounded-[10px] p-4">
-            <div className="text-2xs text-text-tertiary uppercase tracking-wider mb-1">Total Problems</div>
-            <div className="text-xl font-semibold text-text-secondary">{problems.length}</div>
+          <div className="bg-surface-2 border border-border-default rounded-[10px] p-3 sm:p-4">
+            <div className="text-3xs sm:text-2xs text-text-tertiary uppercase tracking-wider mb-1">Problems</div>
+            <div className="text-lg sm:text-xl font-semibold text-text-secondary">{problems.length}</div>
           </div>
         </div>
 
         {/* Personalized Next Problem Card */}
         {recommendation && (
-          <div className="bg-gradient-to-r from-surface-2 via-surface-3 to-surface-2 border border-accent-blue/30 rounded-[10px] p-5 relative overflow-hidden">
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-1.5 flex-1">
-                <div className="flex items-center gap-2">
+          <div className="bg-gradient-to-r from-surface-2 via-surface-3 to-surface-2 border border-accent-blue/30 rounded-[10px] p-4 sm:p-5 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-2xs font-semibold uppercase tracking-wider text-accent-blue flex items-center gap-1">
                     <Sparkles size={12} /> Bhai's Next Recommendation
                   </span>
                   <DiffBadge d={recommendation.problem.difficulty} />
                 </div>
-                <h3 className="text-base font-semibold text-text-primary">{recommendation.problem.title}</h3>
+                <h3 className="text-sm sm:text-base font-semibold text-text-primary truncate">{recommendation.problem.title}</h3>
                 <p className="text-xs text-text-secondary leading-relaxed">{recommendation.reason}</p>
               </div>
               <button
                 onClick={() => selectProblem(recommendation.problem.id)}
-                className="shrink-0 px-4 py-2 rounded-full bg-white text-surface-0 text-xs font-semibold hover:bg-bone transition-all flex items-center gap-1.5 shadow-sm"
+                className="shrink-0 px-4 py-2 rounded-full bg-white text-surface-0 text-xs font-semibold hover:bg-bone transition-all flex items-center justify-center gap-1.5 shadow-sm w-full sm:w-auto"
               >
-                Start Problem
+                <span>Start Problem</span>
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -165,7 +165,7 @@ function CodingLabHome() {
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[180px]">
             <input
               type="text"
               value={search}
@@ -373,7 +373,7 @@ function ProblemWorkspace() {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-surface-0">
       {/* Top Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-border-default bg-surface-1 shrink-0">
+      <div className="flex items-center gap-2 px-3 sm:px-4 py-2 border-b border-border-default bg-surface-1 shrink-0 overflow-x-auto no-scrollbar max-w-full">
         <button
           onClick={() => setLabView('home')}
           className="flex items-center gap-1 text-text-tertiary hover:text-text-primary transition-colors text-xs"
@@ -536,7 +536,9 @@ function ProblemWorkspace() {
           }`}
         >
           {/* Monaco Editor */}
-          <div className="flex-1 min-h-0 bg-[#1e1e1e]">
+          <div className={`flex-1 min-h-0 bg-[#1e1e1e] max-w-full overflow-hidden ${
+            mobileTab === 'console' ? 'hidden lg:block' : 'block'
+          }`}>
             <Editor
               height="100%"
               language={langConfig?.monacoLang || 'plaintext'}
@@ -566,7 +568,9 @@ function ProblemWorkspace() {
           </div>
 
           {/* Action Toolbar */}
-          <div className="flex items-center gap-2 px-4 py-2 border-t border-border-default bg-surface-1 shrink-0">
+          <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 border-t border-border-default bg-surface-1 shrink-0 overflow-x-auto no-scrollbar max-w-full ${
+            mobileTab === 'console' ? 'hidden lg:flex' : 'flex'
+          }`}>
             {isExecuting ? (
               <button
                 onClick={stopExecution}
@@ -623,9 +627,12 @@ function ProblemWorkspace() {
           </div>
 
           {/* Bottom Console Panel */}
-          <div className="h-56 border-t border-border-default bg-surface-1 shrink-0 overflow-hidden flex flex-col">
+          <div className={`border-t border-border-default bg-surface-1 shrink-0 overflow-hidden flex flex-col ${
+            mobileTab === 'code' ? 'hidden lg:flex lg:h-56' :
+            mobileTab === 'console' ? 'flex-1 min-h-0 lg:h-56 lg:flex-none' : 'hidden lg:flex lg:h-56'
+          }`}>
             {/* Console Tabs */}
-            <div className="flex items-center gap-0 border-b border-border-subtle px-2 shrink-0 bg-surface-1">
+            <div className="flex items-center gap-0 border-b border-border-subtle px-2 shrink-0 bg-surface-1 overflow-x-auto no-scrollbar">
               {(['output', 'testcases', 'custom', 'history'] as const).map(tab => (
                 <button
                   key={tab}

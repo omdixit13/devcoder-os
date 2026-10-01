@@ -102,7 +102,7 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
   ];
 
   return (
-    <div className="absolute top-12 right-4 z-50 w-[420px] max-w-[calc(100vw-2rem)] bg-surface-1 border border-border-default rounded-[12px] shadow-2xl overflow-hidden flex flex-col max-h-[580px] animate-scale-up">
+    <div className="fixed sm:absolute top-14 sm:top-12 inset-x-2 sm:inset-x-auto sm:right-4 z-50 w-auto sm:w-[420px] max-w-[calc(100vw-1rem)] bg-surface-1 border border-border-default rounded-[12px] shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-5rem)] sm:max-h-[580px] animate-scale-up">
       {/* Top Bar */}
       <div className="p-3.5 border-b border-border-default flex items-center justify-between bg-surface-2">
         <div className="flex items-center gap-2">

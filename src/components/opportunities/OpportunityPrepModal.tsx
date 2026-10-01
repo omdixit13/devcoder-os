@@ -128,17 +128,17 @@ export default function OpportunityPrepModal({ opportunity, onClose }: Props) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/75 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-5xl h-[90vh] bg-surface-1 border border-border-default rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-scale-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 md:p-8 bg-black/75 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-5xl h-[92dvh] max-h-[calc(100dvh-1rem)] bg-surface-1 border border-border-default rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-scale-in">
         
         {/* Top Header */}
-        <div className="px-6 py-4 border-b border-border-default bg-surface-2 flex items-center justify-between gap-4">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-default bg-surface-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-accent-blue/15 border border-accent-blue/20 flex items-center justify-center text-accent-blue shrink-0">
-              <Trophy size={20} />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent-blue/15 border border-accent-blue/20 flex items-center justify-center text-accent-blue shrink-0">
+              <Trophy size={18} />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span className="text-2xs font-semibold uppercase tracking-wider text-accent-blue">
                   {opportunity.organizer}
                 </span>
@@ -146,26 +146,34 @@ export default function OpportunityPrepModal({ opportunity, onClose }: Props) {
                 <span className="text-2xs text-text-tertiary capitalize">
                   {opportunity.type.replace('_', ' ')}
                 </span>
-                <span className="text-2xs text-text-tertiary">·</span>
-                <span className="text-2xs text-text-tertiary">
+                <span className="hidden sm:inline text-2xs text-text-tertiary">·</span>
+                <span className="hidden sm:inline text-2xs text-text-tertiary">
                   Verified: {new Date(opportunity.lastVerified).toLocaleDateString('en-IN')}
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-text-primary truncate">
+              <h2 className="text-sm sm:text-lg font-bold text-text-primary truncate">
                 Prepare for: {opportunity.title}
               </h2>
             </div>
+
+            {/* Mobile close button at top-right */}
+            <button
+              onClick={onClose}
+              className="sm:hidden w-8 h-8 rounded-lg bg-surface-3 hover:bg-surface-4 text-text-tertiary hover:text-text-primary flex items-center justify-center transition-colors shrink-0"
+            >
+              <X size={16} />
+            </button>
           </div>
 
           {/* Right Header: Readiness & Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap justify-between sm:justify-end">
             {/* Readiness Meter */}
-            <div className="bg-surface-3 border border-border-subtle rounded-xl px-3 py-1.5 flex items-center gap-2">
+            <div className="bg-surface-3 border border-border-subtle rounded-xl px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center gap-2">
               <div className="text-right">
                 <div className="text-2xs text-text-tertiary font-medium">Readiness</div>
-                <div className="text-sm font-bold text-accent-cyan">{readinessScore}%</div>
+                <div className="text-xs sm:text-sm font-bold text-accent-cyan">{readinessScore}%</div>
               </div>
-              <div className="w-10 h-2 bg-surface-4 rounded-full overflow-hidden">
+              <div className="w-8 sm:w-10 h-1.5 sm:h-2 bg-surface-4 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-accent-blue to-accent-cyan transition-all duration-300"
                   style={{ width: `${readinessScore}%` }}
@@ -176,29 +184,29 @@ export default function OpportunityPrepModal({ opportunity, onClose }: Props) {
             {/* Track in Applications */}
             <button
               onClick={handleTrackInApplications}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-2xs sm:text-xs font-semibold transition-all ${
                 trackedStatus
                   ? 'bg-accent-green/15 text-accent-green border border-accent-green/30'
                   : 'bg-surface-3 hover:bg-surface-4 text-text-secondary border border-border-default'
               }`}
             >
               {trackedStatus ? <Check size={14} /> : <Calendar size={14} />}
-              {trackedStatus ? 'Tracking in Apps' : 'Track in Applications'}
+              <span>{trackedStatus ? 'Tracking' : 'Track App'}</span>
             </button>
 
             {/* Ask Bhai */}
             <button
               onClick={handleAskBhaiGeneral}
-              className="flex items-center gap-1.5 bg-accent-purple/15 hover:bg-accent-purple/25 text-accent-purple border border-accent-purple/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 bg-accent-purple/15 hover:bg-accent-purple/25 text-accent-purple border border-accent-purple/30 px-2.5 sm:px-3 py-1.5 rounded-lg text-2xs sm:text-xs font-semibold transition-all"
             >
               <Sparkles size={14} />
-              Ask Bhai
+              <span>Ask Bhai</span>
             </button>
 
-            {/* Close */}
+            {/* Desktop Close */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-surface-3 hover:bg-surface-4 text-text-tertiary hover:text-text-primary flex items-center justify-center transition-colors"
+              className="hidden sm:flex w-8 h-8 rounded-lg bg-surface-3 hover:bg-surface-4 text-text-tertiary hover:text-text-primary items-center justify-center transition-colors"
             >
               <X size={16} />
             </button>
@@ -206,7 +214,7 @@ export default function OpportunityPrepModal({ opportunity, onClose }: Props) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 border-b border-border-default bg-surface-1 flex items-center gap-2 overflow-x-auto">
+        <div className="px-3 sm:px-6 border-b border-border-default bg-surface-1 flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
             <button
               key={tab.id}

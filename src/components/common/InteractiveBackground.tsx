@@ -276,8 +276,8 @@ export default function InteractiveBackground() {
         className="fixed inset-0 pointer-events-none -z-10 w-full h-full opacity-80 transition-opacity duration-700"
       />
 
-      {/* Discreet Ambient Theme Switcher in Bottom Left */}
-      <div className="fixed bottom-3 left-4 z-40">
+      {/* Discreet Ambient Theme Switcher in Bottom Left (Desktop only to prevent mobile nav collision) */}
+      <div className="hidden md:block fixed bottom-3 left-4 z-30">
         <div className="relative">
           <button
             onClick={() => setShowControls(!showControls)}

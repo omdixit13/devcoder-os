@@ -25,7 +25,7 @@ export default function ProfileLoginModal() {
     disconnectAccounts,
   } = useAppStore();
 
-  const [activeTab, setActiveTab] = useState<AuthTab>('profile');
+  const [activeTab, setActiveTab] = useState<AuthTab>(isProfileConnected ? 'profile' : 'signup');
 
   // Profile Form state
   const [name, setName] = useState(userName || '');
@@ -47,17 +47,18 @@ export default function ProfileLoginModal() {
   // Sync inputs when modal opens
   useEffect(() => {
     if (loginModalOpen) {
+      setActiveTab(isProfileConnected ? 'profile' : 'signup');
       setName(userName || '');
-      setGithubInput(githubProfileUrl ? extractHandle(githubProfileUrl, 'github') : 'omdixit13');
-      setLeetcodeInput(leetcodeProfileUrl ? extractHandle(leetcodeProfileUrl, 'leetcode') : 'omdixit13');
-      setRole(userRole || 'B.Tech CSE Student');
-      setCollege(userCollege || 'Computer Science & Engineering');
+      setGithubInput(githubProfileUrl ? extractHandle(githubProfileUrl, 'github') : '');
+      setLeetcodeInput(leetcodeProfileUrl ? extractHandle(leetcodeProfileUrl, 'leetcode') : '');
+      setRole(userRole || 'Aspiring Software Engineer');
+      setCollege(userCollege || '');
       setSavedSuccess(false);
       setAuthError(null);
       setAuthSuccess(null);
       setOauthWarning(null);
     }
-  }, [loginModalOpen, userName, githubProfileUrl, leetcodeProfileUrl, userRole, userCollege]);
+  }, [loginModalOpen, isProfileConnected, userName, githubProfileUrl, leetcodeProfileUrl, userRole, userCollege]);
 
   if (!loginModalOpen) return null;
 
@@ -179,9 +180,9 @@ export default function ProfileLoginModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-0/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-surface-0/80 backdrop-blur-md animate-fade-in">
       <div 
-        className="w-full max-w-lg bg-surface-1 border border-border-default rounded-[14px] shadow-2xl overflow-hidden relative flex flex-col"
+        className="w-full max-w-lg max-h-[calc(100dvh-2rem)] bg-surface-1 border border-border-default rounded-[14px] shadow-2xl overflow-hidden relative flex flex-col my-auto"
         role="dialog"
         aria-modal="true"
       >
@@ -189,9 +190,9 @@ export default function ProfileLoginModal() {
         <div className="h-[2px] w-full bg-gradient-to-r from-accent-copper/20 via-accent-copper to-accent-copper/20" />
 
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-border-default flex items-center justify-between bg-surface-2">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-border-default flex items-center justify-between bg-surface-2 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-surface-3 border border-border-subtle flex items-center justify-center text-accent-copper">
+            <div className="w-8 h-8 rounded-full bg-surface-3 border border-border-subtle flex items-center justify-center text-accent-copper shrink-0">
               <Sparkles size={16} />
             </div>
             <div>
@@ -210,7 +211,7 @@ export default function ProfileLoginModal() {
               soundManager.play('click');
               setLoginModalOpen(false);
             }}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-surface-3 transition-colors shrink-0"
             title="Close"
           >
             <X size={16} />
@@ -218,7 +219,7 @@ export default function ProfileLoginModal() {
         </div>
 
         {/* Navigation Tabs (Phase 14) */}
-        <div className="flex items-center border-b border-border-subtle bg-surface-1 px-6 pt-2">
+        <div className="flex items-center border-b border-border-subtle bg-surface-1 px-4 sm:px-6 pt-2 overflow-x-auto no-scrollbar shrink-0">
           {(['profile', 'login', 'signup', 'forgot'] as const).map(tab => (
             <button
               key={tab}
@@ -263,7 +264,7 @@ export default function ProfileLoginModal() {
 
         {/* TAB 1: Profile & Handles */}
         {activeTab === 'profile' && (
-          <form onSubmit={handleSaveProfile} className="p-6 space-y-4">
+          <form onSubmit={handleSaveProfile} className="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(100dvh-12rem)]">
             <div>
               <label className="block text-2xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5">
                 Your Full Name
@@ -273,7 +274,7 @@ export default function ProfileLoginModal() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Om Dixit"
+                  placeholder="e.g. Your Full Name"
                   className="w-full bg-surface-2 border border-border-default focus:border-border-strong rounded-lg px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none transition-colors"
                   required
                 />
@@ -298,7 +299,7 @@ export default function ProfileLoginModal() {
                 type="text"
                 value={githubInput}
                 onChange={(e) => setGithubInput(e.target.value)}
-                placeholder="e.g. omdixit13 or https://github.com/omdixit13"
+                placeholder="e.g. username or https://github.com/username"
                 className="w-full bg-surface-2 border border-border-default focus:border-border-strong rounded-lg px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none transition-colors"
               />
               {previewGhUrl && (
@@ -326,7 +327,7 @@ export default function ProfileLoginModal() {
                 type="text"
                 value={leetcodeInput}
                 onChange={(e) => setLeetcodeInput(e.target.value)}
-                placeholder="e.g. omdixit13 or https://leetcode.com/u/omdixit13"
+                placeholder="e.g. username or https://leetcode.com/u/username"
                 className="w-full bg-surface-2 border border-border-default focus:border-border-strong rounded-lg px-3.5 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none transition-colors"
               />
               {previewLcUrl && (
@@ -409,7 +410,7 @@ export default function ProfileLoginModal() {
 
         {/* TAB 2: Sign In */}
         {activeTab === 'login' && (
-          <form onSubmit={handleLogin} className="p-6 space-y-4">
+          <form onSubmit={handleLogin} className="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(100dvh-12rem)]">
             <div>
               <label className="block text-2xs font-semibold uppercase tracking-wider text-text-secondary mb-1">
                 Email Address
@@ -489,7 +490,7 @@ export default function ProfileLoginModal() {
 
         {/* TAB 3: Sign Up */}
         {activeTab === 'signup' && (
-          <form onSubmit={handleSignup} className="p-6 space-y-4">
+          <form onSubmit={handleSignup} className="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(100dvh-12rem)]">
             <div>
               <label className="block text-2xs font-semibold uppercase tracking-wider text-text-secondary mb-1">
                 Your Full Name
@@ -498,7 +499,7 @@ export default function ProfileLoginModal() {
                 type="text"
                 value={signupName}
                 onChange={e => setSignupName(e.target.value)}
-                placeholder="e.g. Om Dixit"
+                placeholder="e.g. Your Full Name"
                 className="w-full bg-surface-2 border border-border-default rounded-lg px-3.5 py-2 text-xs text-text-primary outline-none focus:border-border-strong"
                 required
               />
@@ -562,7 +563,7 @@ export default function ProfileLoginModal() {
 
         {/* TAB 4: Forgot Password */}
         {activeTab === 'forgot' && (
-          <form onSubmit={handleForgotPassword} className="p-6 space-y-4">
+          <form onSubmit={handleForgotPassword} className="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(100dvh-12rem)]">
             <p className="text-xs text-text-secondary leading-relaxed">
               Enter your registered email address to receive password reset instructions.
             </p>

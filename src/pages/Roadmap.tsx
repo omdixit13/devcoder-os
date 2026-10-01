@@ -129,34 +129,34 @@ export default function RoadmapPage() {
   const levels = getNodePositions(categorySkills);
 
   return (
-    <div className="h-full flex overflow-hidden">
+    <div className="h-full flex overflow-hidden min-w-0">
       {/* Main Roadmap Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full min-w-0">
           {/* Header */}
-          <div className="flex items-start justify-between mb-6 animate-fade-in">
+          <div className="flex items-start justify-between mb-6 animate-fade-in gap-3">
             <div>
               <h1 className="text-xl font-semibold text-text-primary mb-1">Custom Skill Roadmap</h1>
-              <p className="text-sm text-text-tertiary">
+              <p className="text-xs sm:text-sm text-text-tertiary">
                 Personalized milestone progression. Click any node to track, prioritize, or customize.
               </p>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-3 border border-border-default text-text-primary text-xs font-medium hover:bg-surface-4 hover:border-border-strong transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-3 border border-border-default text-text-primary text-xs font-medium hover:bg-surface-4 hover:border-border-strong transition-all shadow-sm shrink-0"
             >
               <Plus size={14} className="text-accent-copper" />
-              Add Milestone
+              <span>Add Milestone</span>
             </button>
           </div>
 
           {/* Category Tabs */}
-          <div className="flex gap-1 mb-8 bg-surface-2 rounded-lg p-1 w-fit flex-wrap">
+          <div className="flex gap-1 mb-8 bg-surface-2 rounded-lg p-1 w-full sm:w-fit overflow-x-auto no-scrollbar">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => { setSelectedCategory(cat); setDetailOpen(false); }}
-                className={`px-4 py-2 rounded-md text-xs font-medium transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap ${
                   selectedCategory === cat
                     ? 'bg-surface-4 text-text-primary shadow-sm font-semibold'
                     : 'text-text-tertiary hover:text-text-secondary'
@@ -168,7 +168,7 @@ export default function RoadmapPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex flex-wrap gap-3 sm:gap-4 mb-6">
             {Object.entries(statusConfig).map(([key, config]) => (
               <div key={key} className="flex items-center gap-1.5">
                 <span className={config.color}>{config.icon}</span>
@@ -178,7 +178,7 @@ export default function RoadmapPage() {
           </div>
 
           {/* Roadmap Graph */}
-          <div className="space-y-12 relative">
+          <div className="space-y-12 relative overflow-x-auto no-scrollbar py-2">
             {levels.map((level, levelIdx) => (
               <div key={levelIdx} className="relative">
                 {/* Level Connector Line */}
@@ -186,7 +186,7 @@ export default function RoadmapPage() {
                   <div className="absolute left-1/2 -bottom-8 w-px h-8 bg-border-default -translate-x-1/2 z-0" />
                 )}
 
-                <div className="flex justify-center gap-4 flex-wrap relative z-10">
+                <div className="flex justify-center gap-3 sm:gap-4 flex-wrap relative z-10">
                   {level.map(skill => {
                     const config = statusConfig[skill.status];
                     const isSelected = selectedSkillId === skill.id;
@@ -195,7 +195,7 @@ export default function RoadmapPage() {
                       <button
                         key={skill.id}
                         onClick={() => handleNodeClick(skill)}
-                        className={`group relative flex flex-col items-center p-4 rounded-[12px] border transition-all min-w-[170px] max-w-[210px] text-center ${config.bg} ${config.border} ${
+                        className={`group relative flex flex-col items-center p-3 sm:p-4 rounded-[12px] border transition-all min-w-[130px] sm:min-w-[170px] max-w-[210px] text-center ${config.bg} ${config.border} ${
                           isSelected ? 'ring-2 ring-accent-copper scale-105 shadow-md' : 'hover:scale-102 hover:shadow-sm'
                         }`}
                       >
@@ -231,7 +231,7 @@ export default function RoadmapPage() {
           </div>
 
           {/* Stats Summary */}
-          <div className="mt-12 grid grid-cols-4 gap-3">
+          <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {Object.entries(statusConfig).filter(([k]) => k !== 'needs_revision').map(([key, config]) => {
               const count = categorySkills.filter(s => s.status === key).length;
               return (
@@ -247,7 +247,12 @@ export default function RoadmapPage() {
 
       {/* Skill Detail & Customization Drawer (Phase 20) */}
       {detailOpen && selectedSkill && (
-        <div className="w-[360px] bg-surface-1 border-l border-border-default overflow-y-auto animate-slide-in-right flex flex-col shrink-0">
+        <>
+          <div
+            onClick={() => setDetailOpen(false)}
+            className="fixed inset-0 bg-surface-0/60 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+          />
+          <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[380px] bg-surface-1 border-l border-border-default overflow-y-auto animate-slide-in-right flex flex-col shadow-2xl">
           <div className="p-5 space-y-5 flex-1">
             {/* Header */}
             <div>
@@ -382,6 +387,7 @@ export default function RoadmapPage() {
             )}
           </div>
         </div>
+        </>
       )}
 
       {/* Add Custom Milestone Modal */}

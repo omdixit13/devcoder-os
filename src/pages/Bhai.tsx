@@ -4,7 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import type { BhaiMessage } from '../types';
 
 // Bhai's response logic — simulating intelligent Hinglish tutor behavior
-function generateBhaiResponse(userMessage: string, context: { conceptId?: string | null; messages: BhaiMessage[] }): string {
+function generateBhaiResponse(userMessage: string, context: { conceptId?: string | null; messages: BhaiMessage[]; userName?: string }): string {
   const msg = userMessage.toLowerCase().trim();
   
   // Teaching Binary Search
@@ -173,7 +173,8 @@ Kya start karein? Main Binary Search on Answer se shuru karta hoon if you want.`
   }
 
   if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('namaste')) {
-    return `Hey Om! Kaise hain aap? 
+    const greetingName = context.userName ? `${context.userName}` : 'dost';
+    return `Hey ${greetingName}! Kaise hain aap? 
 
 Aaj kya plan hai? Learning continue karein, practice karein, ya kuch specific topic discuss karna hai?
 
@@ -192,7 +193,7 @@ Main try karunga best possible way mein explain karna. Chaliye, batao! 😊`;
 }
 
 export default function BhaiPage() {
-  const { bhaiMessages, addBhaiMessage, bhaiTeachingConcept, setBhaiTeachingConcept, setCurrentPage } = useAppStore();
+  const { bhaiMessages, addBhaiMessage, bhaiTeachingConcept, setBhaiTeachingConcept, setCurrentPage, userName } = useAppStore();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -236,6 +237,7 @@ export default function BhaiPage() {
       const response = generateBhaiResponse(message, {
         conceptId: bhaiTeachingConcept,
         messages: [...bhaiMessages, userMsg],
+        userName,
       });
 
       const bhaiMsg: BhaiMessage = {
@@ -258,11 +260,11 @@ export default function BhaiPage() {
   ];
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-w-0">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-border-subtle shrink-0">
+      <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-border-subtle shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent-purple to-purple-700 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent-purple to-purple-700 flex items-center justify-center shrink-0">
             <Sparkles size={14} className="text-white" />
           </div>
           <div>
@@ -273,13 +275,13 @@ export default function BhaiPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-4 min-w-0">
         {bhaiMessages.map((msg) => (
           <div
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
           >
-            <div className={`max-w-[75%] ${msg.role === 'user' ? 'order-2' : ''}`}>
+            <div className={`max-w-[88%] sm:max-w-[75%] min-w-0 ${msg.role === 'user' ? 'order-2' : ''}`}>
               {msg.role === 'bhai' && (
                 <div className="flex items-center gap-1.5 mb-1">
                   <Sparkles size={10} className="text-accent-purple" />
@@ -318,12 +320,12 @@ export default function BhaiPage() {
 
       {/* Quick Actions */}
       {bhaiMessages.length <= 2 && (
-        <div className="px-6 pb-2 flex flex-wrap gap-2">
+        <div className="px-3 sm:px-6 pb-2 flex flex-wrap gap-1.5 sm:gap-2">
           {quickActions.map((action, i) => (
             <button
               key={i}
               onClick={() => handleSend(action.label)}
-              className="flex items-center gap-1.5 bg-surface-3 hover:bg-surface-4 border border-border-default text-text-secondary text-xs px-3 py-1.5 rounded-full transition-colors"
+              className="flex items-center gap-1.5 bg-surface-3 hover:bg-surface-4 border border-border-default text-text-secondary text-xs px-2.5 sm:px-3 py-1.5 rounded-full transition-colors"
             >
               {action.icon}
               {action.label}
@@ -333,8 +335,8 @@ export default function BhaiPage() {
       )}
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-border-subtle shrink-0">
-        <div className="flex items-center gap-3 bg-surface-3 border border-border-default rounded-xl px-4 py-2.5 focus-within:border-accent-purple/50 transition-colors">
+      <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-border-subtle shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 bg-surface-3 border border-border-default rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 focus-within:border-accent-purple/50 transition-colors">
           <input
             ref={inputRef}
             type="text"
@@ -342,7 +344,7 @@ export default function BhaiPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask Bhai anything..."
-            className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none"
+            className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none min-w-0"
           />
           <button
             onClick={() => handleSend()}
@@ -376,7 +378,7 @@ function MessageContent({ content }: { content: string }) {
         if (part.startsWith('```')) {
           const code = part.replace(/```\w*\n?/g, '').replace(/```$/, '');
           return (
-            <pre key={i} className="bg-surface-0 rounded-lg p-3 my-2 overflow-x-auto font-mono text-xs text-text-primary border border-border-subtle">
+            <pre key={i} className="bg-surface-0 rounded-lg p-2.5 sm:p-3 my-2 overflow-x-auto font-mono text-2xs sm:text-xs text-text-primary border border-border-subtle max-w-full">
               <code>{code}</code>
             </pre>
           );

@@ -52,7 +52,7 @@ export default function App() {
   }, [leetcodeProfileUrl, fetchLeetCodeStatsAction]);
 
   return (
-    <div className="h-screen w-screen flex bg-surface-0/85 backdrop-blur-[1px] text-text-primary overflow-hidden relative">
+    <div className="h-full min-h-[100dvh] w-full max-w-full min-w-0 flex bg-surface-0/85 backdrop-blur-[1px] text-text-primary overflow-hidden relative">
       {/* Dynamic 3D / Celestial Interactive Atmosphere */}
       <InteractiveBackground />
 
@@ -65,7 +65,7 @@ export default function App() {
         <TopBar />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-hidden bg-transparent pb-14 md:pb-0">
+        <main className="flex-1 overflow-hidden bg-transparent pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
           <PageComponent />
         </main>
       </div>

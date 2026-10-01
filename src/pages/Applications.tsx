@@ -37,18 +37,18 @@ export default function ApplicationsPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 w-full min-w-0">
         {/* Header */}
-        <div className="flex items-center justify-between animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
           <div>
             <h1 className="text-xl font-semibold text-text-primary mb-1">Applications</h1>
-            <p className="text-sm text-text-tertiary">Track your internship and job applications pipeline.</p>
+            <p className="text-xs sm:text-sm text-text-tertiary">Track your internship and job applications pipeline.</p>
           </div>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-1.5 bg-paper-white hover:bg-white/90 text-obsidian px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-[0.98] shadow-sm"
+            className="flex items-center justify-center gap-1.5 bg-paper-white hover:bg-white/90 text-obsidian px-4 py-2 rounded-full text-xs font-semibold transition-all active:scale-[0.98] shadow-sm w-full sm:w-auto shrink-0"
           >
-            <Plus size={14} /> Add Application
+            <Plus size={14} /> <span>Add Application</span>
           </button>
         </div>
 
@@ -57,12 +57,12 @@ export default function ApplicationsPage() {
 
         {/* Search */}
         <div className="flex items-center gap-2 bg-surface-2 border border-border-default rounded-lg px-3 py-2">
-          <Search size={14} className="text-text-tertiary" />
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search applications..." className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none" />
+          <Search size={14} className="text-text-tertiary shrink-0" />
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search applications..." className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary outline-none min-w-0" />
         </div>
 
         {/* Pipeline Overview */}
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {statusSteps.map(step => {
             const count = applications.filter(a => a.status === step.key).length;
             return (

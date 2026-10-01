@@ -27,7 +27,7 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-surface-1 border-t border-border-default flex items-center justify-around px-2 z-40">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface-1/95 backdrop-blur-md border-t border-border-default flex items-center justify-around px-1 z-40 h-[calc(3.5rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] max-w-full">
       {mobileItems.map((item) => {
         const isActive = currentPage === item.id;
         return (
