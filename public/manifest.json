@@ -1,0 +1,18 @@
+{
+  "short_name": "DevCareer",
+  "name": "DevCareer OS — Developer Career & Learning OS",
+  "description": "Find it. Learn it. Build it. Get ready. — Personal Developer Career + Learning OS",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#08080a",
+  "theme_color": "#08080a",
+  "display": "standalone",
+  "orientation": "portrait"
+}

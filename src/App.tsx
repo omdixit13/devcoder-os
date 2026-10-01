@@ -6,6 +6,8 @@ import ProfileLoginModal from './components/common/ProfileLoginModal';
 import InteractiveBackground from './components/common/InteractiveBackground';
 import { useAppStore } from './store/useAppStore';
 
+import MobileBottomNav from './components/layout/MobileBottomNav';
+
 // Pages
 import HomePage from './pages/Home';
 import LeetCodePage from './pages/LeetCode';
@@ -20,6 +22,7 @@ import AnalyticsPage from './pages/Analytics';
 import BhaiPage from './pages/Bhai';
 import SettingsPage from './pages/Settings';
 import CareerCompassPage from './pages/CareerCompass';
+import CodingLabPage from './pages/CodingLab';
 
 const pageComponents: Record<string, React.FC> = {
   home: HomePage,
@@ -35,6 +38,7 @@ const pageComponents: Record<string, React.FC> = {
   analytics: AnalyticsPage,
   bhai: BhaiPage,
   settings: SettingsPage,
+  codinglab: CodingLabPage,
 };
 
 export default function App() {
@@ -61,10 +65,13 @@ export default function App() {
         <TopBar />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-hidden bg-transparent">
+        <main className="flex-1 overflow-hidden bg-transparent pb-14 md:pb-0">
           <PageComponent />
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation (Phase 22) */}
+      <MobileBottomNav />
 
       {/* Command Palette Overlay */}
       <CommandPalette />

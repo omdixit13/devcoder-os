@@ -6,6 +6,7 @@ import {
   ExternalLink as ExternalLinkIcon, Code2, AlertTriangle, Eye, HelpCircle
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
+import { useCodingLabStore } from '../store/useCodingLabStore';
 import ExternalLink from '../components/common/ExternalLink';
 import type { Problem, Concept } from '../types';
 import { soundManager } from '../utils/soundManager';
@@ -16,6 +17,7 @@ type WorkspaceTab = 'learn' | 'notes' | 'w3schools' | 'videos' | 'practice' | 'r
 
 export default function LearningPage() {
   const { skills, concepts, resources, reviews, problems, setCurrentPage, setBhaiTeachingConcept, completeConcept } = useAppStore();
+  const { selectedProblem, labView } = useCodingLabStore();
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>('binary-search');
   const [selectedConceptId, setSelectedConceptId] = useState<string | null>('bs-intro');
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('learn');
@@ -77,14 +79,35 @@ export default function LearningPage() {
   };
 
   return (
-    <div className="h-full flex overflow-hidden">
-      {/* Left: Skill/Concept List */}
-      <div className="w-[260px] bg-surface-1 border-r border-border-default overflow-y-auto shrink-0 flex flex-col justify-between">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-text-primary">Learning</h2>
-            <span className="text-2xs text-accent-copper font-medium">Topic Workspace</span>
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Return to Coding Lab Banner (Phase 10) */}
+      {selectedProblem && labView === 'problem' && (
+        <div className="bg-accent-blue/10 border-b border-accent-blue/20 px-4 py-2 flex items-center justify-between shrink-0 animate-fade-in">
+          <div className="flex items-center gap-2 text-2xs text-accent-blue">
+            <Code2 size={14} />
+            <span>Currently studying concept for Coding Lab problem: <strong className="text-white">{selectedProblem.title}</strong></span>
           </div>
+          <button
+            onClick={() => {
+              soundManager.play('navigation');
+              setCurrentPage('codinglab');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-blue text-white text-2xs font-semibold hover:bg-accent-blue/90 transition-all shadow-sm"
+          >
+            <ArrowLeft size={12} />
+            Return to Problem ({selectedProblem.title})
+          </button>
+        </div>
+      )}
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left: Skill/Concept List */}
+        <div className="w-[260px] bg-surface-1 border-r border-border-default overflow-y-auto shrink-0 flex flex-col justify-between">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-text-primary">Learning</h2>
+              <span className="text-2xs text-accent-copper font-medium">Topic Workspace</span>
+            </div>
           
           {/* Due Reviews Banner */}
           {dueReviews.length > 0 && (
@@ -610,6 +633,7 @@ export default function LearningPage() {
             Select a concept from the left panel to begin.
           </div>
         )}
+      </div>
       </div>
     </div>
   );

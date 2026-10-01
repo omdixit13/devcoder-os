@@ -4,7 +4,7 @@
 export type PageId = 
   | 'home' | 'leetcode' | 'opportunities' | 'learning' 
   | 'roadmap' | 'practice' | 'compass' | 'applications' | 'github' 
-  | 'analytics' | 'bhai' | 'settings' | 'mistakes';
+  | 'analytics' | 'bhai' | 'settings' | 'mistakes' | 'codinglab';
 
 // --- Skill & Learning ---
 export type SkillStatus = 'not_started' | 'learning' | 'needs_revision' | 'comfortable' | 'mastered';
@@ -21,6 +21,10 @@ export interface SkillNode {
   description: string;
   conceptCount: number;
   completedConcepts: number;
+  priority?: 'High' | 'Medium' | 'Low';
+  deadline?: string;
+  notes?: string;
+  isCustom?: boolean;
 }
 
 export interface Concept {
@@ -235,6 +239,24 @@ export interface DailyStats {
   reviewsDone: number;
   reviewsDue: number;
   sessionsCompleted: number;
+}
+
+// --- Notifications ---
+export type NotificationCategory = 'all' | 'new' | 'deadlines' | 'internships' | 'contests' | 'cybersecurity' | 'learning';
+
+export interface NamedNotification {
+  id: string;
+  category: 'new' | 'deadlines' | 'internships' | 'contests' | 'cybersecurity' | 'learning';
+  company: string;
+  title: string;
+  deadline: string;
+  matchReason: string;
+  source: string;
+  read: boolean;
+  saved?: boolean;
+  url?: string;
+  opportunityId?: string;
+  actionDestination?: { page: PageId; id?: string };
 }
 
 // --- Command Palette ---

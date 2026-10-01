@@ -10,4 +10,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   fetchLeetCodeStats: (username) => ipcRenderer.invoke('fetch-leetcode-stats', username),
+  // Coding Lab
+  checkLanguage: (checkCmd) => ipcRenderer.invoke('check-language', checkCmd),
+  executeCode: (params) => ipcRenderer.invoke('execute-code', params),
+  killProcess: () => ipcRenderer.invoke('kill-process'),
 });

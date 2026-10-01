@@ -8,7 +8,7 @@ import {
 } from '../data/mockData';
 import type { 
   SkillNode, Concept, Problem, Opportunity, InternshipApplication,
-  ReviewItem, LeetCodeContest, DailyStats, Mistake, Resource
+  ReviewItem, LeetCodeContest, DailyStats, Mistake, Resource, NamedNotification
 } from '../types';
 import { soundManager } from '../utils/soundManager';
 import { triggerConfetti } from '../utils/confetti';
@@ -71,6 +71,9 @@ interface AppState {
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
   updateSkillStatus: (id: string, status: SkillStatus) => void;
+  addSkillNode: (skill: SkillNode) => void;
+  removeSkillNode: (id: string) => void;
+  updateSkillCustomData: (id: string, data: Partial<SkillNode>) => void;
   
   // Concepts
   concepts: Concept[];
@@ -128,9 +131,11 @@ interface AppState {
   startSession: (conceptId: string, type: string) => void;
   endSession: () => void;
   
-  // Notifications
-  notifications: { id: string; text: string; type: string; read: boolean }[];
+  // Notifications (Phase 17 & 18)
+  notifications: NamedNotification[];
   markNotificationRead: (id: string) => void;
+  dismissNotification: (id: string) => void;
+  saveNotification: (id: string) => void;
 
   // GitHub Solution Sync (Section 14)
   syncedSolutions: {
@@ -261,6 +266,22 @@ export const useAppStore = create<AppState>()(
       setSelectedCategory: (cat) => set({ selectedCategory: cat }),
       updateSkillStatus: (id, status) => set((state) => ({
         skills: state.skills.map(s => s.id === id ? { ...s, status } : s)
+      })),
+      addSkillNode: (skill) => {
+        soundManager.play('milestone');
+        set(state => ({
+          skills: [...state.skills, skill]
+        }));
+      },
+      removeSkillNode: (id) => {
+        soundManager.play('click');
+        set(state => ({
+          skills: state.skills.filter(s => s.id !== id),
+          selectedSkillId: state.selectedSkillId === id ? null : state.selectedSkillId,
+        }));
+      },
+      updateSkillCustomData: (id, data) => set(state => ({
+        skills: state.skills.map(s => s.id === id ? { ...s, ...data } : s)
       })),
       
       // Concepts
@@ -474,14 +495,75 @@ export const useAppStore = create<AppState>()(
       }),
       endSession: () => set({ activeSession: null }),
       
-      // Notifications
+      // Notifications (Phase 17 & 18: Named notifications with verified opportunities)
       notifications: [
-        { id: 'n1', text: 'Binary Search Basics review due today', type: 'review', read: false },
-        { id: 'n2', text: 'Codeforces Round #900 starts in 2 days', type: 'contest', read: false },
-        { id: 'n3', text: 'Amazon ML Challenge deadline in 4 days', type: 'opportunity', read: false },
+        {
+          id: 'notif-amazon-sde',
+          category: 'internships',
+          company: 'Amazon',
+          title: 'Amazon — Software Development Engineer Internship (2026 Batch) is Open',
+          deadline: 'Oct 15, 2026',
+          matchReason: 'Matches your profile: DSA (Arrays & Two Pointers) and Python/C++ skills.',
+          source: 'Amazon Student Careers • Verified',
+          read: false,
+          opportunityId: 'opp-1',
+          url: 'https://amazon.jobs/en/jobs/2541289',
+        },
+        {
+          id: 'notif-gsoc-2026',
+          category: 'new',
+          company: 'Google',
+          title: 'Google Summer of Code 2026 Contributor Guidance Open',
+          deadline: 'Oct 22, 2026',
+          matchReason: 'Open-source repo contributions match your public GitHub profile.',
+          source: 'Google Open Source Portal • Verified',
+          read: false,
+          opportunityId: 'opp-2',
+          url: 'https://summerofcode.withgoogle.com',
+        },
+        {
+          id: 'notif-lc-contest',
+          category: 'contests',
+          company: 'LeetCode',
+          title: 'LeetCode Weekly Contest 442 Starting This Sunday',
+          deadline: 'Oct 04, 2026',
+          matchReason: 'Active rating progression for your target 1600+ milestone.',
+          source: 'LeetCode Live Contest Calendar • Verified',
+          read: false,
+          actionDestination: { page: 'codinglab' },
+          url: 'https://leetcode.com/contest',
+        },
+        {
+          id: 'notif-tcs-cyber',
+          category: 'cybersecurity',
+          company: 'TCS Cyber Defense',
+          title: 'TCS HackQuest Season 9 — Ethical Hacking & Defense Challenge',
+          deadline: 'Oct 28, 2026',
+          matchReason: 'Matches the Cybersecurity skill track and system vulnerability roadmap.',
+          source: 'TCS NextStep Portal • Verified',
+          read: false,
+          actionDestination: { page: 'opportunities' },
+        },
+        {
+          id: 'notif-spaced-review',
+          category: 'learning',
+          company: 'DevCareer OS',
+          title: 'Binary Search & Lower Bound Concepts Due for Active Recall',
+          deadline: 'Today',
+          matchReason: '3 days since last practice — optimal spacing curve for retention.',
+          source: 'DevCareer Spaced Repetition Engine',
+          read: false,
+          actionDestination: { page: 'learning' },
+        },
       ],
       markNotificationRead: (id) => set((state) => ({
         notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+      })),
+      dismissNotification: (id) => set((state) => ({
+        notifications: state.notifications.filter(n => n.id !== id)
+      })),
+      saveNotification: (id) => set((state) => ({
+        notifications: state.notifications.map(n => n.id === id ? { ...n, saved: !n.saved } : n)
       })),
 
       // GitHub Solution Sync (Section 14)

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Home, Code2, Trophy, BookOpen, Map, Dumbbell, Briefcase,
-  GitBranch, BarChart3, MessageCircle, Settings, Zap, ChevronLeft, ChevronRight, Compass
+  GitBranch, BarChart3, MessageCircle, Settings, Zap, ChevronLeft, ChevronRight, Compass, Terminal
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import type { PageId } from '../../types';
@@ -18,6 +18,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'home', label: 'Home', icon: <Home size={18} /> },
   { id: 'leetcode', label: 'LeetCode', icon: <Code2 size={18} /> },
+  { id: 'codinglab', label: 'Coding Lab', icon: <Terminal size={18} /> },
   { id: 'opportunities', label: 'Opportunities', icon: <Trophy size={18} /> },
   { id: 'learning', label: 'Learning', icon: <BookOpen size={18} /> },
   { id: 'roadmap', label: 'Roadmap', icon: <Map size={18} /> },
@@ -42,7 +43,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex flex-col h-full bg-surface-1 border-r border-border-default transition-all duration-300 ${
+      className={`hidden md:flex flex-col h-full bg-surface-1 border-r border-border-default transition-all duration-300 ${
         collapsed ? 'w-[60px]' : 'w-[220px]'
       }`}
     >
