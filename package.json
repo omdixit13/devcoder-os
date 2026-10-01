@@ -47,6 +47,9 @@
   "build": {
     "appId": "com.bholenath.os",
     "productName": "BHOLENATH OS",
+    "directories": {
+      "output": "release"
+    },
     "win": {
       "target": "nsis"
     },

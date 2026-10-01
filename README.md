@@ -93,7 +93,7 @@ npm run electron:dev
 ```bash
 npm run electron:build
 ```
-The compiled installer will be saved in `dist/BHOLENATH OS Setup 1.0.0.exe`.
+The compiled installer will be saved in `release/BHOLENATH OS Setup 1.0.0.exe`.
 
 ---
 
