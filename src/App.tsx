@@ -35,7 +35,7 @@ const pageComponents: Record<string, React.FC> = {
   opportunities: OpportunitiesPage,
   learning: LearningPage,
   roadmap: RoadmapPage,
-  practice: PracticePage,
+  practice: CodingLabPage,
   compass: CareerCompassPage,
   applications: ApplicationsPage,
   mistakes: MistakesPage,

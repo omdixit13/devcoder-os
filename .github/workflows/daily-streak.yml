@@ -1,0 +1,51 @@
+name: Daily Heatmap Streak & Activity Pulse
+
+on:
+  schedule:
+    # Runs daily at 00:05 UTC (05:35 AM IST)
+    - cron: '5 0 * * *'
+  workflow_dispatch: # Allows manual run anytime from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  daily-pulse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Update Daily Pulse Log
+        run: |
+          mkdir -p .github/activity
+          CURRENT_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          echo "[$CURRENT_DATE] DevCoder OS automated streak pulse for Om Dixit" >> .github/activity/pulse.txt
+          tail -n 100 .github/activity/pulse.txt > .github/activity/pulse.tmp && mv .github/activity/pulse.tmp .github/activity/pulse.txt
+          
+          cat << EOF > .github/activity/DAILY_PULSE.md
+          # DevCoder OS Daily Activity Pulse
+          
+          - **Last Active Pulse:** $CURRENT_DATE
+          - **Status:** Healthy & Active
+          - **Automated Streak Guardian:** Keeping GitHub contributions heatmap active for @omdixit13
+          EOF
+
+      - name: Commit and Push Heatmap Pulse
+        run: |
+          git config --global user.name "om dixit"
+          git config --global user.email "omdixit0902@gmail.com"
+          
+          git add .github/activity/pulse.txt .github/activity/DAILY_PULSE.md
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore(streak): daily activity pulse $(date -u +'%Y-%m-%d') [skip ci]"
+            git push origin main
+          fi

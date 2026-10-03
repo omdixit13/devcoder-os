@@ -72,10 +72,12 @@ interface CodingLabState {
   checkSingleLanguage: (lang: SupportedLanguage) => Promise<void>;
 
   // Console
-  consoleTab: 'output' | 'testcases' | 'hidden_tests' | 'custom' | 'history';
-  setConsoleTab: (tab: 'output' | 'testcases' | 'hidden_tests' | 'custom' | 'history') => void;
+  consoleTab: 'input' | 'output' | 'error' | 'testcases' | 'testresults' | 'custom' | 'history';
+  setConsoleTab: (tab: 'input' | 'output' | 'error' | 'testcases' | 'testresults' | 'custom' | 'history') => void;
 
   // Filters & Search
+  sourceFilter: 'All' | 'SIR_SHEET' | 'CORE';
+  setSourceFilter: (f: 'All' | 'SIR_SHEET' | 'CORE') => void;
   topicFilter: string;
   difficultyFilter: string;
   setTopicFilter: (f: string) => void;
@@ -97,12 +99,21 @@ export const useCodingLabStore = create<CodingLabState>()(
       selectedProblemId: null,
       selectedProblem: null,
       selectProblem: (id) => {
-        const problem = codingProblems.find(p => p.id === id) || null;
+        let targetId = id;
+        if (id.startsWith('sheet-')) {
+          const num = parseInt(id.replace('sheet-', ''), 10);
+          if (!isNaN(num)) {
+            targetId = `sir-${String(num).padStart(3, '0')}`;
+          }
+        }
+        const allProbs = get().problems.length > 0 ? get().problems : codingProblems;
+        const problem = allProbs.find(p => p.id === targetId || p.id === id) || codingProblems.find(p => p.id === targetId || p.id === id) || null;
+        const actualId = problem ? problem.id : targetId;
         const lang = get().currentLanguage;
-        const saved = get().savedDrafts[id]?.[lang];
+        const saved = get().savedDrafts[actualId]?.[lang];
         const starterCode = problem?.starterCode[lang] || LANGUAGE_CONFIGS[lang]?.template || '';
         set({
-          selectedProblemId: id,
+          selectedProblemId: actualId,
           selectedProblem: problem,
           editorCode: saved || starterCode,
           executionStatus: 'idle',
@@ -176,9 +187,9 @@ export const useCodingLabStore = create<CodingLabState>()(
         const { editorCode, currentLanguage, customInput, selectedProblem } = get();
         soundManager.play('click');
 
-        // Case 1: Custom stdin provided or user entered custom input
-        if (stdin !== undefined || customInput.trim()) {
-          const input = stdin ?? customInput;
+        // Case 1: Custom stdin explicitly provided
+        if (stdin !== undefined) {
+          const input = stdin;
           set({ isExecuting: true, executionStatus: 'running', executionResult: null, consoleTab: 'output' });
           try {
             const result = await executeCode(editorCode, currentLanguage, input);
@@ -211,7 +222,7 @@ export const useCodingLabStore = create<CodingLabState>()(
         // Case 2: Run against visible test cases
         if (!selectedProblem) return;
         const visibleTests = selectedProblem.testCases.filter(tc => !tc.isHidden);
-        set({ isExecuting: true, executionStatus: 'running', testResults: [], consoleTab: 'testcases' });
+        set({ isExecuting: true, executionStatus: 'running', testResults: [], consoleTab: 'testresults' });
 
         const results: TestResult[] = [];
         let allPassed = true;
@@ -602,6 +613,8 @@ export const useCodingLabStore = create<CodingLabState>()(
       setConsoleTab: (tab) => set({ consoleTab: tab }),
 
       // Filters
+      sourceFilter: 'All',
+      setSourceFilter: (f) => set({ sourceFilter: f }),
       topicFilter: 'All',
       difficultyFilter: 'All',
       setTopicFilter: (f) => set({ topicFilter: f }),

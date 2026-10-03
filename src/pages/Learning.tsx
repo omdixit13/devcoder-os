@@ -209,6 +209,35 @@ export default function LearningPage() {
       <div className="flex-1 overflow-y-auto">
         {selectedConcept ? (
           <div className="max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6 animate-fade-in w-full min-w-0">
+            {/* Return to Problem Callout if launched from a problem (Spec Section 16) */}
+            {selectedProblem && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-[10px] bg-copper/10 border border-copper/30 shadow-sm animate-fade-in">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-full bg-copper/20 flex items-center justify-center text-copper shrink-0">
+                    <Code2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-text-primary">
+                      Currently Practicing: <span className="text-copper">{selectedProblem.title}</span>
+                    </div>
+                    <div className="text-2xs text-text-tertiary">
+                      Your code draft and custom testcases are safely preserved in Coding Lab.
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    soundManager.play('navigation');
+                    setCurrentPage('codinglab');
+                  }}
+                  className="px-4 py-1.5 rounded-full bg-copper text-black text-xs font-semibold hover:bg-copper/90 transition-all flex items-center gap-1.5 shadow-sm shrink-0"
+                >
+                  <span>Return to Problem</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Mobile Topic Selector (Visible on < md screens) */}
             <div className="md:hidden bg-surface-2 border border-border-default rounded-[10px] p-3 space-y-2">
               <div className="flex items-center justify-between">

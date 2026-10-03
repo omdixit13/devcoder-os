@@ -74,10 +74,10 @@ export default function Sidebar() {
             <button
               key={item.id}
               id={`nav-${item.id}`}
-              onClick={() => setCurrentPage(item.id)}
+              onClick={() => setCurrentPage(item.id === 'practice' ? 'codinglab' : item.id)}
               title={collapsed ? item.label : undefined}
               className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 group relative ${
-                isActive
+                isActive || (item.id === 'practice' && currentPage === 'codinglab')
                   ? 'bg-surface-4 text-text-primary'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
               }`}

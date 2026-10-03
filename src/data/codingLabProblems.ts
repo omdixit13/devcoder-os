@@ -1,6 +1,7 @@
 import type { CodingProblem } from '../types/codingLab';
+import { sirsSheetCodingProblems } from './sirsSheetCodingProblems';
 
-export const codingProblems: CodingProblem[] = [
+export const coreCodingProblems: CodingProblem[] = [
   {
     id: 'two-sum',
     title: 'Two Sum',
@@ -369,11 +370,20 @@ export const codingProblems: CodingProblem[] = [
       cpp: `#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\nint main() {\n    int n; if (!(cin >> n)) return 0;\n    vector<int> coins(n);\n    for (int i = 0; i < n; i++) cin >> coins[i];\n    int amount; cin >> amount;\n    vector<int> dp(amount + 1, 1e9);\n    dp[0] = 0;\n    for (int i = 1; i <= amount; i++) {\n        for (int c : coins) {\n            if (i >= c) dp[i] = min(dp[i], dp[i - c] + 1);\n        }\n    }\n    cout << (dp[amount] >= 1e9 ? -1 : dp[amount]) << endl;\n    return 0;\n}\n`,
     },
     relatedConcepts: ['dynamic-programming'],
+    source: 'CORE',
   },
 ];
 
+export { sirsSheetCodingProblems };
+
+// Complete dataset: core problems + all 29 Sir's Sheet problems
+export const codingProblems: CodingProblem[] = [
+  ...sirsSheetCodingProblems,
+  ...coreCodingProblems.map(p => ({ ...p, source: p.source || 'CORE' as const })),
+];
+
 export const TOPIC_CATEGORIES = [
-  'All', 'Arrays', 'Strings', 'Hashing', 'Two Pointers', 'Sliding Window',
+  'All', "Sir's Sheet", 'Arrays', 'Strings', 'Hashing', 'Two Pointers', 'Sliding Window',
   'Binary Search', 'Stack', 'Queue', 'Linked List', 'Trees',
-  'Graphs', 'Heap', 'Greedy', 'Dynamic Programming', 'Sorting', 'Math',
+  'Graphs', 'Heap', 'Greedy', 'Dynamic Programming', 'Sorting', 'Math', '2D Array',
 ];

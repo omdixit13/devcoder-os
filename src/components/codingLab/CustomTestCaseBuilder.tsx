@@ -6,7 +6,7 @@ import { soundManager } from '../../utils/soundManager';
 import { getMentorAddress } from '../../utils/mentorPersonalization';
 import { authService } from '../../services/authService';
 
-export type TestCaseCategory = 'NORMAL' | 'BOUNDARY' | 'EDGE CASE' | 'DUPLICATE' | 'MINIMUM' | 'SPECIAL CASE';
+export type TestCaseCategory = 'NORMAL' | 'BOUNDARY' | 'EDGE' | 'DUPLICATE' | 'MINIMUM' | 'SPECIAL';
 
 export interface CustomTestCase {
   id: string;
@@ -21,39 +21,63 @@ interface CustomTestCaseBuilderProps {
   editorCode: string;
   currentLanguage: SupportedLanguage;
   problemTitle: string;
+  inputFormat?: string;
+  outputFormat?: string;
+  constraints?: string[];
+  onAddTestCase?: (tc: { input: string; expectedOutput: string; isCustom: boolean }) => void;
 }
 
 const CATEGORIES: TestCaseCategory[] = [
   'NORMAL',
   'BOUNDARY',
-  'EDGE CASE',
+  'EDGE',
   'DUPLICATE',
   'MINIMUM',
-  'SPECIAL CASE',
+  'SPECIAL',
 ];
 
 const categoryPillStyles: Record<TestCaseCategory, string> = {
   NORMAL: 'bg-accent-blue/15 text-accent-blue border-accent-blue/30',
   BOUNDARY: 'bg-accent-yellow/15 text-accent-yellow border-accent-yellow/30',
-  'EDGE CASE': 'bg-accent-red/15 text-accent-red border-accent-red/30',
+  EDGE: 'bg-accent-red/15 text-accent-red border-accent-red/30',
   DUPLICATE: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
   MINIMUM: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  'SPECIAL CASE': 'bg-accent-copper/15 text-accent-copper border-accent-copper/30',
+  SPECIAL: 'bg-accent-copper/15 text-accent-copper border-accent-copper/30',
 };
 
-const categoryExplanations: Record<TestCaseCategory, string> = {
-  NORMAL: 'Checks the typical expected input range to confirm the core algorithm logic works smoothly under normal conditions.',
-  BOUNDARY: 'Checks values at the extreme limits of the problem constraints (e.g. maximum N = 10^5 or max integer values).',
-  'EDGE CASE': 'Checks unusual conditions such as negative numbers, zero targets, or empty lists where standard assumptions break down.',
-  DUPLICATE: 'Verifies whether your solution correctly handles repeated values without skipping pointers or over-counting.',
-  MINIMUM: 'Checks base input sizes (e.g. N = 1 or N = 2) to ensure edge checks and pointer initializations do not crash.',
-  'SPECIAL CASE': 'Checks problem-specific tricky arrangements like reverse-sorted arrays, all identical elements, or alternating parity.',
+const categoryExplanations: Record<TestCaseCategory, { whatValues: string; whyItMatters: string }> = {
+  NORMAL: {
+    whatValues: 'Standard moderate values within typical ranges (e.g. 4 to 10 positive numbers).',
+    whyItMatters: 'Confirms your primary algorithm logic and standard loops run smoothly without basic syntax or off-by-one bugs.',
+  },
+  BOUNDARY: {
+    whatValues: 'Values reaching the absolute maximum or minimum bounds specified in problem constraints (e.g. N = 10^5, max integers ±10^9).',
+    whyItMatters: 'Catches integer overflow, quadratic O(N^2) timeouts (TLE), and large memory allocations.',
+  },
+  EDGE: {
+    whatValues: 'Target not found in array, negative integers, zeros, or empty sequences.',
+    whyItMatters: 'Verifies whether your code cleanly exits or correctly returns default sentinel values (like -1 or empty list) instead of crashing.',
+  },
+  DUPLICATE: {
+    whatValues: 'Arrays with repeated elements (e.g. [2, 2, 2, 2] or duplicates at the boundaries).',
+    whyItMatters: 'Exposes greedy pointer skips, strict vs non-strict inequalities (< vs <=), and hash map collisions.',
+  },
+  MINIMUM: {
+    whatValues: 'Smallest legal input size allowed by constraints (e.g. N = 1 or N = 2).',
+    whyItMatters: 'Ensures initial pointer indexing (like nums[1] or right = n - 1) does not throw IndexError / out of bounds.',
+  },
+  SPECIAL: {
+    whatValues: 'Arrangements with distinct structural patterns (e.g. strictly reverse-sorted arrays or alternating high-low elements).',
+    whyItMatters: 'Tests whether your algorithm relies on accidental ordering or fails worst-case partitioning (like in QuickSelect or unbalanced binary search).',
+  },
 };
 
 export default function CustomTestCaseBuilder({
   editorCode,
   currentLanguage,
   problemTitle,
+  inputFormat,
+  outputFormat,
 }: CustomTestCaseBuilderProps) {
   const [testCases, setTestCases] = useState<CustomTestCase[]>([
     {
@@ -109,7 +133,7 @@ export default function CustomTestCaseBuilder({
       input: '',
       expectedOutput: '',
       description: `Custom test #${nextNum}`,
-      category: 'EDGE CASE',
+      category: 'EDGE',
     };
     setTestCases(prev => [...prev, newTC]);
     setActiveTab(newId);
@@ -244,15 +268,33 @@ export default function CustomTestCaseBuilder({
             </div>
           </div>
 
-          {/* OM Explains: What does this test actually check? */}
-          <div className="bg-surface-2 border border-border-default rounded-[10px] p-3 space-y-1 relative overflow-hidden">
-            <div className="flex items-center gap-1.5 text-accent-copper font-medium text-2xs">
-              <Brain size={13} />
-              <span>OM Explains: What does this test actually check?</span>
+          {/* OM Explains: Educational Test Case Design (Spec Section 11: 4 Points) */}
+          <div className="bg-surface-2 border border-border-default rounded-[10px] p-3 space-y-1.5 relative overflow-hidden">
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-1.5 text-accent-copper font-medium text-2xs">
+                <Brain size={13} />
+                <span>OM Mentorship: Educational Test Case Design ({activeTC.category})</span>
+              </div>
+              <span className="text-[10px] font-mono text-text-tertiary">Step-by-step guidance</span>
             </div>
-            <p className="text-2xs text-text-secondary leading-relaxed pl-5">
-              “{mentorSalutation}, {categoryExplanations[activeTC.category]}”
-            </p>
+            <div className="space-y-1 text-2xs pl-4 border-l border-accent-copper/30 ml-1">
+              <div>
+                <strong className="text-accent-copper">1. Input Format: </strong>
+                <span className="text-text-secondary">{inputFormat || 'Multiline stdin matching problem description.'}</span>
+              </div>
+              <div>
+                <strong className="text-accent-yellow">2. What values to choose: </strong>
+                <span className="text-text-secondary">{categoryExplanations[activeTC.category]?.whatValues}</span>
+              </div>
+              <div>
+                <strong className="text-accent-green">3. Expected Output: </strong>
+                <span className="text-text-secondary">{outputFormat || 'Exact expected output string or numbers.'}</span>
+              </div>
+              <div>
+                <strong className="text-accent-blue">4. Why this testcase matters: </strong>
+                <span className="text-text-secondary">{categoryExplanations[activeTC.category]?.whyItMatters}</span>
+              </div>
+            </div>
           </div>
 
           {/* Input & Expected Output Fields */}

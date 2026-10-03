@@ -81,6 +81,15 @@ export interface CodingProblem {
   starterCode: Partial<Record<SupportedLanguage, string>>;
   solutionCode?: Partial<Record<SupportedLanguage, string>>;
   relatedConcepts: string[]; // link to Learning concepts
+  source?: 'SIR_SHEET' | 'CORE';
+  sourceOrder?: number;
+  platform?: 'LeetCode' | 'GeeksforGeeks' | string;
+  platformUrl?: string;
+  inputFormat?: string;
+  outputFormat?: string;
+  isDuplicatePreserved?: boolean;
+  duplicateOfId?: string;
+  drillLevel?: 'direct' | 'small_variation' | 'combined' | 'tricky';
 }
 
 export interface CodingAttempt {

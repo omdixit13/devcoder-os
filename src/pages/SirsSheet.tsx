@@ -96,13 +96,14 @@ export default function SirsSheetPage() {
   }, [sirsSheetProblems]);
 
   const handlePracticeInLab = (p: SirsSheetProblem) => {
-    if (p.codingLabProblemId) {
-      selectProblem(p.codingLabProblemId);
-    }
+    const targetId = p.codingLabProblemId || `sir-${String(p.orderNumber).padStart(3, '0')}`;
+    selectProblem(targetId);
     setCurrentPage('codinglab');
   };
 
   const handleLearnConcept = (p: SirsSheetProblem) => {
+    const targetId = p.codingLabProblemId || `sir-${String(p.orderNumber).padStart(3, '0')}`;
+    selectProblem(targetId);
     if (p.conceptId) {
       setSelectedConceptId(p.conceptId);
     }
@@ -129,29 +130,42 @@ export default function SirsSheetPage() {
           </p>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div className="flex items-center bg-carbon border border-border/60 rounded-full p-1 self-start md:self-auto">
+        {/* View Switcher Tabs & Direct Practice */}
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
           <button
-            onClick={() => setActiveTab('sheet')}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-              activeTab === 'sheet'
-                ? 'bg-copper text-black font-semibold shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
+            onClick={() => {
+              const firstUnsolved = sirsSheetProblems.find(p => p.status !== 'solved') || sirsSheetProblems[0];
+              handlePracticeInLab(firstUnsolved);
+            }}
+            className="px-4 py-1.5 rounded-full text-xs font-semibold bg-copper text-black hover:bg-copper/90 flex items-center gap-1.5 transition-all shadow-sm"
           >
-            All 29 Problems
+            <Code2 className="w-3.5 h-3.5" />
+            <span>Direct Practice</span>
           </button>
-          <button
-            onClick={() => setActiveTab('pattern_recognition')}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all ${
-              activeTab === 'pattern_recognition'
-                ? 'bg-copper text-black font-semibold shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            Pattern Recognition Mode
-          </button>
+
+          <div className="flex items-center bg-carbon border border-border/60 rounded-full p-1">
+            <button
+              onClick={() => setActiveTab('sheet')}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+                activeTab === 'sheet'
+                  ? 'bg-copper text-black font-semibold shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              All 29 Problems
+            </button>
+            <button
+              onClick={() => setActiveTab('pattern_recognition')}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all ${
+                activeTab === 'pattern_recognition'
+                  ? 'bg-copper text-black font-semibold shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              Pattern Recognition Mode
+            </button>
+          </div>
         </div>
       </div>
 
