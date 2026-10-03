@@ -6,10 +6,13 @@ import {
   sampleApplications, sampleReviews, sampleContests, sampleDailyStats,
   sampleMistakes, sampleResources
 } from '../data/mockData';
-import type { 
+import { 
   SkillNode, Concept, Problem, Opportunity, InternshipApplication,
-  ReviewItem, LeetCodeContest, DailyStats, Mistake, Resource, NamedNotification
+  ReviewItem, LeetCodeContest, DailyStats, Mistake, Resource, NamedNotification,
+  SirsSheetProblem, SirsSheetStatus, ExamSession, ExamSubmissionRecord
 } from '../types';
+import { sirsPracticeSheet } from '../data/sirsSheetData';
+import { defaultExamQuestions } from '../data/examQuestionsData';
 import { soundManager } from '../utils/soundManager';
 import { triggerConfetti } from '../utils/confetti';
 import { normalizeProfileUrl } from '../utils/urlValidator';
@@ -158,6 +161,26 @@ interface AppState {
     repository: string;
     url: string;
   }) => void;
+
+  // Sir's Practice Sheet
+  sirsSheetProblems: SirsSheetProblem[];
+  updateSirsSheetStatus: (id: string, status: SirsSheetStatus) => void;
+  incrementSirsSheetAttempts: (id: string) => void;
+
+  // 90-Minute Exam Simulator
+  activeExamSession: ExamSession | null;
+  startExamSession: () => void;
+  setExamActiveQuestion: (index: number) => void;
+  updateExamCode: (questionId: string, code: string) => void;
+  updateExamCustomInput: (questionId: string, input: string) => void;
+  recordExamSubmission: (questionId: string, submission: ExamSubmissionRecord) => void;
+  updateExamRemainingSeconds: (seconds: number) => void;
+  completeExamSession: () => void;
+  resetExamSession: () => void;
+
+  // Tech News Saved
+  savedTechNewsIds: string[];
+  toggleSaveTechNews: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -598,6 +621,207 @@ export const useAppStore = create<AppState>()(
           syncedSolutions: [newSol, ...state.syncedSolutions]
         }));
       },
+
+      // Sir's Practice Sheet
+      sirsSheetProblems: sirsPracticeSheet,
+      updateSirsSheetStatus: (id, status) => {
+        set(state => ({
+          sirsSheetProblems: state.sirsSheetProblems.map(p =>
+            p.id === id ? { ...p, status, lastAttempted: new Date().toISOString() } : p
+          ),
+        }));
+        if (status === 'solved') {
+          soundManager.play('taskCompleted');
+          triggerConfetti();
+        }
+      },
+      incrementSirsSheetAttempts: (id) => {
+        set(state => ({
+          sirsSheetProblems: state.sirsSheetProblems.map(p =>
+            p.id === id ? { ...p, attempts: p.attempts + 1, lastAttempted: new Date().toISOString() } : p
+          ),
+        }));
+      },
+
+      // 90-Minute Exam Simulator
+      activeExamSession: null,
+      startExamSession: () => {
+        const initialCodes: Record<string, string> = {};
+        const initialInputs: Record<string, string> = {};
+        defaultExamQuestions.forEach(q => {
+          initialCodes[q.id] = q.starterCode;
+          initialInputs[q.id] = q.examples[0]?.input || '';
+        });
+
+        const newSession: ExamSession = {
+          id: `exam-${Date.now()}`,
+          startedAt: new Date().toISOString(),
+          totalSeconds: 5400, // 90 mins
+          remainingSeconds: 5400,
+          status: 'in_progress',
+          activeQuestionIndex: 0,
+          questions: defaultExamQuestions,
+          codes: initialCodes,
+          customInputs: initialInputs,
+          submissions: {},
+          debrief: null,
+        };
+
+        soundManager.play('milestone');
+        set({ activeExamSession: newSession });
+      },
+      setExamActiveQuestion: (index) => {
+        set(state => state.activeExamSession ? ({
+          activeExamSession: {
+            ...state.activeExamSession,
+            activeQuestionIndex: index,
+          }
+        }) : {});
+      },
+      updateExamCode: (questionId, code) => {
+        set(state => state.activeExamSession ? ({
+          activeExamSession: {
+            ...state.activeExamSession,
+            codes: {
+              ...state.activeExamSession.codes,
+              [questionId]: code,
+            }
+          }
+        }) : {});
+      },
+      updateExamCustomInput: (questionId, input) => {
+        set(state => state.activeExamSession ? ({
+          activeExamSession: {
+            ...state.activeExamSession,
+            customInputs: {
+              ...state.activeExamSession.customInputs,
+              [questionId]: input,
+            }
+          }
+        }) : {});
+      },
+      recordExamSubmission: (questionId, submission) => {
+        set(state => {
+          if (!state.activeExamSession) return {};
+          const updatedSubmissions = {
+            ...state.activeExamSession.submissions,
+            [questionId]: submission,
+          };
+          if (submission.status === 'passed' && submission.passedTests === submission.totalTests) {
+            soundManager.play('taskCompleted');
+          } else {
+            soundManager.play('error');
+          }
+          return {
+            activeExamSession: {
+              ...state.activeExamSession,
+              submissions: updatedSubmissions,
+            }
+          };
+        });
+      },
+      updateExamRemainingSeconds: (seconds) => {
+        set(state => state.activeExamSession ? ({
+          activeExamSession: {
+            ...state.activeExamSession,
+            remainingSeconds: Math.max(0, seconds),
+          }
+        }) : {});
+      },
+      completeExamSession: () => {
+        const session = get().activeExamSession;
+        if (!session) return;
+        
+        let attemptedCount = 0;
+        let solvedCount = 0;
+        let runtimeErrors = 0;
+        let compilationErrors = 0;
+        let wrongAnswers = 0;
+        const weakConceptsSet = new Set<string>();
+
+        const breakdown = session.questions.map(q => {
+          const sub = session.submissions[q.id];
+          const hasAttempted = !!sub || session.codes[q.id] !== q.starterCode;
+          if (hasAttempted) attemptedCount++;
+
+          const isSolved = sub?.status === 'passed' && sub.passedTests === sub.totalTests;
+          if (isSolved) {
+            solvedCount++;
+          } else {
+            q.hiddenConcepts.forEach(c => weakConceptsSet.add(c));
+          }
+
+          if (sub) {
+            if (sub.status === 'runtime_error') runtimeErrors++;
+            else if (sub.status === 'wrong_answer') wrongAnswers++;
+            if (sub.error && (sub.error.includes('SyntaxError') || sub.error.includes('IndentationError'))) {
+              compilationErrors++;
+            }
+          }
+
+          return {
+            questionTitle: q.title,
+            concepts: q.hiddenConcepts,
+            debriefText: q.debriefExplanation,
+            isSolved: !!isSolved,
+          };
+        });
+
+        const weakConcepts = Array.from(weakConceptsSet);
+        const recommendations: string[] = [];
+        if (weakConcepts.length === 0) {
+          recommendations.push('Outstanding performance! All 3 mock problems solved within time.');
+          recommendations.push('Maintain muscle memory with daily 20-min timed practice drills.');
+        } else {
+          recommendations.push(`Revise ${weakConcepts.slice(0, 2).join(' & ')} pattern recognition with OM.`);
+          recommendations.push('Check Sir\'s Practice Sheet variations for the concepts you missed.');
+          recommendations.push('Review the hidden concept breakdown below to train pattern detection.');
+        }
+
+        const debrief = {
+          attemptedCount,
+          solvedCount,
+          timeSpentSeconds: session.totalSeconds - session.remainingSeconds,
+          compilationErrors,
+          runtimeErrors,
+          wrongAnswers,
+          weakConcepts,
+          conceptBreakdown: breakdown,
+          recommendations,
+        };
+
+        if (solvedCount > 0) {
+          soundManager.play('milestone');
+          triggerConfetti();
+        } else {
+          soundManager.play('taskCompleted');
+        }
+
+        set({
+          activeExamSession: {
+            ...session,
+            status: 'completed',
+            debrief,
+          }
+        });
+      },
+      resetExamSession: () => {
+        set({ activeExamSession: null });
+      },
+
+      // Tech News Saved
+      savedTechNewsIds: [],
+      toggleSaveTechNews: (id) => {
+        set(state => {
+          const exists = state.savedTechNewsIds.includes(id);
+          soundManager.play('click');
+          return {
+            savedTechNewsIds: exists
+              ? state.savedTechNewsIds.filter(i => i !== id)
+              : [...state.savedTechNewsIds, id],
+          };
+        });
+      },
     }),
     {
       name: 'bholenath_os_store',
@@ -621,6 +845,9 @@ export const useAppStore = create<AppState>()(
         dailyStats: state.dailyStats,
         syncedSolutions: state.syncedSolutions,
         leetcodeStats: state.leetcodeStats,
+        sirsSheetProblems: state.sirsSheetProblems,
+        activeExamSession: state.activeExamSession,
+        savedTechNewsIds: state.savedTechNewsIds,
       }),
       version: 4,
       migrate: (persistedState: any) => {

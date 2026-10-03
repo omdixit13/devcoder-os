@@ -46,7 +46,7 @@ export function analyzeCodeComplexity(
       return {
         type: 'warning',
         headline: 'Exponential Call Tree Warning',
-        message: `Bhai ne notice kiya ki aap pure recursion use kar rahe hain bina memoization ke. Isse duplicate subproblems baar-baar recalculate honge (O(2ⁿ)). Ek memo dictionary ya 1D array banake results store karke dekhiye!`,
+        message: `OM ne notice kiya ki aap pure recursion use kar rahe hain bina memoization ke. Isse duplicate subproblems baar-baar recalculate honge (O(2ⁿ)). Ek memo dictionary ya 1D array banake results store karke dekhiye!`,
       };
     }
   }
@@ -138,7 +138,7 @@ Input aur Expected Output compare kijiye.`,
 
   return {
     type: 'insight',
-    headline: 'Bhai Coding Coach',
+    headline: 'OM Mentor',
     message: `Apna approach implement kijiye. Agar kahi fasein toh Hint lene me koi sharm nahi — step by step seekhna hi asli growth hai!`,
   };
 }
@@ -164,7 +164,7 @@ export function checkRepeatedMistakes(
         hasPattern: true,
         topic,
         failCount,
-        message: `Bhai noticed a pattern: ${topic} is currently causing repeated mistakes (${failCount} recent failed attempts). Ek baar is concept ko fundamentally revise kar lein toh aage ke saare problems bahut aasaan ho jayenge!`,
+        message: `OM noticed a pattern: ${topic} is currently causing repeated mistakes (${failCount} recent failed attempts). Ek baar is concept ko fundamentally revise kar lein toh aage ke saare problems bahut aasaan ho jayenge!`,
       };
     }
   }

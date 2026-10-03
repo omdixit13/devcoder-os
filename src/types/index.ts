@@ -4,7 +4,8 @@
 export type PageId = 
   | 'home' | 'leetcode' | 'opportunities' | 'learning' 
   | 'roadmap' | 'practice' | 'compass' | 'applications' | 'github' 
-  | 'analytics' | 'bhai' | 'settings' | 'mistakes' | 'codinglab';
+  | 'analytics' | 'bhai' | 'om' | 'settings' | 'mistakes' | 'codinglab'
+  | 'sirsheet' | 'examsimulator' | 'technews' | 'cybersecurity';
 
 // --- Skill & Learning ---
 export type SkillStatus = 'not_started' | 'learning' | 'needs_revision' | 'comfortable' | 'mastered';
@@ -317,3 +318,98 @@ export interface UserCareerExperiment {
   completedAt?: string;
 }
 
+// --- Sir's Practice Sheet ---
+export type SirsSheetTopic = 'two_pointers' | 'hashmap_prefix' | 'binary_search' | 'matrix_2d';
+export type SirsSheetStatus = 'not_started' | 'learning' | 'attempted' | 'solved' | 'needs_review';
+
+export interface SirsSheetProblem {
+  id: string;
+  orderNumber: number;
+  title: string;
+  platform: 'LeetCode' | 'GeeksforGeeks';
+  topic: SirsSheetTopic;
+  topicLabel: string;
+  url: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  status: SirsSheetStatus;
+  attempts: number;
+  lastAttempted: string | null;
+  codingLabProblemId?: string;
+  drillLevel?: 'direct' | 'small_variation' | 'combined' | 'tricky';
+  conceptId?: string;
+  isDuplicatePreserved?: boolean;
+}
+
+// --- 90-Minute Exam Simulator ---
+export interface ExamQuestion {
+  id: string;
+  number: 1 | 2 | 3;
+  title: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  statement: string;
+  inputFormat: string;
+  outputFormat: string;
+  constraints: string[];
+  examples: { input: string; output: string; explanation?: string }[];
+  testCases: { id: string; input: string; expectedOutput: string; isHidden: boolean }[];
+  hiddenConcepts: string[];
+  debriefExplanation: string;
+  starterCode: string;
+  solutionCode: string;
+}
+
+export interface ExamSubmissionRecord {
+  questionId: string;
+  code: string;
+  status: 'passed' | 'wrong_answer' | 'runtime_error' | 'time_limit';
+  passedTests: number;
+  totalTests: number;
+  output: string;
+  error?: string;
+  submittedAt: string;
+}
+
+export interface ExamSession {
+  id: string;
+  startedAt: string;
+  totalSeconds: number; // 5400 (90 mins)
+  remainingSeconds: number;
+  status: 'not_started' | 'in_progress' | 'completed';
+  activeQuestionIndex: number;
+  questions: ExamQuestion[];
+  codes: Record<string, string>; // questionId -> code
+  customInputs: Record<string, string>; // questionId -> stdin
+  submissions: Record<string, ExamSubmissionRecord>;
+  debrief: {
+    attemptedCount: number;
+    solvedCount: number;
+    timeSpentSeconds: number;
+    compilationErrors: number;
+    runtimeErrors: number;
+    wrongAnswers: number;
+    weakConcepts: string[];
+    conceptBreakdown: { questionTitle: string; concepts: string[]; debriefText: string; isSolved: boolean }[];
+    recommendations: string[];
+  } | null;
+}
+
+// --- Tech News ---
+export type TechNewsCategory = 
+  | 'AI/ML' | 'Software Engineering' | 'Cybersecurity' | 'Cloud' 
+  | 'Developer Tools' | 'Open Source' | 'Programming Languages' 
+  | 'Databases' | 'Web' | 'Research' | 'Tech Industry';
+
+export interface TechNewsArticle {
+  id: string;
+  title: string;
+  source: string;
+  date: string;
+  url: string;
+  category: TechNewsCategory;
+  summary: string;
+  whyItMatters: string;
+  relevantSkills: string[];
+  relatedConceptId?: string;
+  verified: boolean;
+  saved?: boolean;
+}

@@ -186,10 +186,10 @@ export default function PracticePage() {
                             </button>
                           )}
                           <button
-                            onClick={() => { setBhaiTeachingConcept(problem.conceptId); setCurrentPage('bhai'); }}
-                            className="text-2xs text-accent-blue hover:text-blue-400 font-medium ml-auto"
+                            onClick={() => { setBhaiTeachingConcept(problem.conceptId); setCurrentPage('om'); }}
+                            className="text-2xs text-accent-copper hover:underline font-medium ml-auto"
                           >
-                            Ask Bhai for help
+                            Ask OM for help
                           </button>
                         </div>
                       </div>

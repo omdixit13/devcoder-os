@@ -190,17 +190,17 @@ export default function LearningPage() {
           </div>
         </div>
 
-        {/* Bottom Bhai Quick Link */}
+        {/* Bottom OM Quick Link */}
         <div className="p-3 border-t border-border-subtle bg-surface-1/50">
           <button
             onClick={() => {
               if (selectedConcept) setBhaiTeachingConcept(selectedConcept.id);
-              setCurrentPage('bhai');
+              setCurrentPage('om');
             }}
             className="w-full py-2 px-3 rounded-full bg-surface-3 hover:bg-surface-4 border border-border-subtle text-2xs text-text-secondary hover:text-text-primary transition-colors flex items-center justify-center gap-1.5"
           >
             <Sparkles size={12} className="text-accent-copper" />
-            <span>Ask Bhai About This</span>
+            <span>Ask OM About This</span>
           </button>
         </div>
       </div>
@@ -281,12 +281,12 @@ export default function LearningPage() {
                   <button
                     onClick={() => {
                       setBhaiTeachingConcept(selectedConcept.id);
-                      setCurrentPage('bhai');
+                      setCurrentPage('om');
                     }}
                     className="px-3.5 py-1.5 rounded-full bg-surface-3 hover:bg-surface-4 text-text-primary border border-border-default text-xs font-medium transition-colors flex items-center gap-1.5"
                   >
                     <Sparkles size={13} className="text-accent-copper" />
-                    <span>Bhai Tutor</span>
+                    <span>OM Mentor</span>
                   </button>
 
                   <button

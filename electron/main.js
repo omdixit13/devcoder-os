@@ -104,11 +104,6 @@ ipcMain.handle('fetch-leetcode-stats', async (_event, username) => {
   }
 });
 
-// ===== Coding Lab: Sandboxed Code Execution =====
-const { execFile, spawn } = require('child_process');
-const fs = require('fs');
-const os = require('os');
-
 // ===== Coding Lab: Hardened Local Code Execution Engine =====
 const { execFile, spawn, execSync } = require('child_process');
 const fs = require('fs');

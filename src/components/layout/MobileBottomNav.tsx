@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, BookOpen, Terminal, Trophy, Compass } from 'lucide-react';
+import { Home, BookOpen, Terminal, Newspaper, Compass } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import type { PageId } from '../../types';
 import { soundManager } from '../../utils/soundManager';
@@ -14,7 +14,7 @@ const mobileItems: NavItem[] = [
   { id: 'home', label: 'Home', icon: <Home size={18} /> },
   { id: 'learning', label: 'Learn', icon: <BookOpen size={18} /> },
   { id: 'codinglab', label: 'Code', icon: <Terminal size={18} /> },
-  { id: 'opportunities', label: 'Opportunities', icon: <Trophy size={18} /> },
+  { id: 'technews', label: 'News', icon: <Newspaper size={18} /> },
   { id: 'compass', label: 'Career', icon: <Compass size={18} /> },
 ];
 

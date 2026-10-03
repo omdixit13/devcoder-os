@@ -37,10 +37,10 @@ export default function MistakesPage() {
               ))}
             </div>
             <button
-              onClick={() => { setBhaiTeachingConcept(recurringTags[0]?.[0] || null); setCurrentPage('bhai'); }}
-              className="mt-3 text-2xs text-accent-purple hover:text-purple-400 font-medium flex items-center gap-1"
+              onClick={() => { setBhaiTeachingConcept(recurringTags[0]?.[0] || null); setCurrentPage('om'); }}
+              className="mt-3 text-2xs text-accent-copper hover:underline font-medium flex items-center gap-1"
             >
-              <Brain size={12} /> Ask Bhai for targeted revision
+              <Brain size={12} /> Ask OM for targeted revision
             </button>
           </div>
         )}

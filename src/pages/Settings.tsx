@@ -150,7 +150,7 @@ export default function SettingsPage() {
               <form onSubmit={handleSaveProfile} className="space-y-4 bg-surface-2 border border-border-default rounded-[10px] p-5">
                 <SettingRow
                   title="Display Name"
-                  description="Your name across greetings, Bhai chats, and profile cards"
+                  description="Your name across greetings, OM chats, and profile cards"
                 >
                   <input
                     type="text"

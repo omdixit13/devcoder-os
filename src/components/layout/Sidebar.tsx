@@ -1,7 +1,8 @@
 import React from 'react';
 import {
   Home, Code2, Trophy, BookOpen, Map, Dumbbell, Briefcase,
-  GitBranch, BarChart3, MessageCircle, Settings, Zap, ChevronLeft, ChevronRight, Compass, Terminal
+  GitBranch, BarChart3, MessageCircle, Settings, Zap, ChevronLeft, ChevronRight,
+  Compass, Terminal, FileSpreadsheet, Clock, Newspaper, Shield, Sparkles
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import type { PageId } from '../../types';
@@ -16,23 +17,26 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'home', label: 'Home', icon: <Home size={18} /> },
-  { id: 'leetcode', label: 'LeetCode', icon: <Code2 size={18} /> },
-  { id: 'codinglab', label: 'Coding Lab', icon: <Terminal size={18} /> },
-  { id: 'opportunities', label: 'Opportunities', icon: <Trophy size={18} /> },
-  { id: 'learning', label: 'Learning', icon: <BookOpen size={18} /> },
-  { id: 'roadmap', label: 'Roadmap', icon: <Map size={18} /> },
-  { id: 'practice', label: 'Practice', icon: <Dumbbell size={18} /> },
-  { id: 'compass', label: 'Career Compass', icon: <Compass size={18} /> },
-  { id: 'applications', label: 'Applications', icon: <Briefcase size={18} /> },
-  { id: 'mistakes', label: 'Mistakes', icon: <Zap size={18} /> },
-  { id: 'github', label: 'GitHub', icon: <GitBranch size={18} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={18} /> },
+  { id: 'home', label: 'Home', icon: <Home size={17} /> },
+  { id: 'leetcode', label: 'LeetCode', icon: <Code2 size={17} /> },
+  { id: 'codinglab', label: 'Coding Lab', icon: <Terminal size={17} /> },
+  { id: 'sirsheet', label: "Sir's Practice Sheet", icon: <FileSpreadsheet size={17} /> },
+  { id: 'examsimulator', label: 'Exam Simulator', icon: <Clock size={17} /> },
+  { id: 'opportunities', label: 'Opportunities', icon: <Trophy size={17} /> },
+  { id: 'technews', label: 'Tech News', icon: <Newspaper size={17} /> },
+  { id: 'learning', label: 'Learning', icon: <BookOpen size={17} /> },
+  { id: 'roadmap', label: 'Roadmap', icon: <Map size={17} /> },
+  { id: 'practice', label: 'Practice', icon: <Dumbbell size={17} /> },
+  { id: 'compass', label: 'Career Compass', icon: <Compass size={17} /> },
+  { id: 'cybersecurity', label: 'Cybersecurity', icon: <Shield size={17} /> },
+  { id: 'applications', label: 'Applications', icon: <Briefcase size={17} /> },
+  { id: 'github', label: 'GitHub', icon: <GitBranch size={17} /> },
+  { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={17} /> },
 ];
 
 const bottomNavItems: NavItem[] = [
-  { id: 'bhai', label: 'Bhai', icon: <MessageCircle size={18} /> },
-  { id: 'settings', label: 'Settings', icon: <Settings size={18} /> },
+  { id: 'om', label: 'OM', icon: <MessageCircle size={17} /> },
+  { id: 'settings', label: 'Settings', icon: <Settings size={17} /> },
 ];
 
 export default function Sidebar() {
@@ -111,10 +115,10 @@ export default function Sidebar() {
                 isActive
                   ? 'bg-surface-4 text-text-primary'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-3'
-              } ${item.id === 'bhai' && !isActive ? 'text-accent-purple' : ''}`}
+              } ${item.id === 'om' && !isActive ? 'text-accent-copper' : ''}`}
             >
               <span className={`shrink-0 ${
-                item.id === 'bhai' ? 'text-accent-purple' : 
+                item.id === 'om' ? 'text-accent-copper' : 
                 isActive ? 'text-accent-blue' : 'text-text-tertiary group-hover:text-text-secondary'
               }`}>
                 {item.icon}
@@ -177,6 +181,18 @@ export default function Sidebar() {
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
+
+        {/* Brand Footer: Spec Section 101 */}
+        {!collapsed && (
+          <div className="pt-2 pb-1 text-center border-t border-border-subtle/50">
+            <div className="text-[11px] font-mono text-accent-copper font-medium tracking-wide">
+              ॐ OM
+            </div>
+            <div className="text-[9px] font-mono text-text-tertiary tracking-widest uppercase">
+              DevCareer OS
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

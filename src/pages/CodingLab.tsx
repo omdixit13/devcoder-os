@@ -18,6 +18,7 @@ import {
   checkRepeatedMistakes,
   getStructuredHint,
 } from '../utils/bhaiCodingCoach';
+import { getContextualCodeSuggestion, type CodeSuggestionMode } from '../utils/codeSuggestionService';
 
 // ===== Difficulty Badge =====
 const diffColors: Record<ProblemDifficulty, { bg: string; text: string }> = {
@@ -145,7 +146,7 @@ function CodingLabHome() {
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-2xs font-semibold uppercase tracking-wider text-accent-blue flex items-center gap-1">
-                    <Sparkles size={12} /> Bhai's Next Recommendation
+                    <Sparkles size={12} /> OM's Next Recommendation
                   </span>
                   <DiffBadge d={recommendation.problem.difficulty} />
                 </div>
@@ -242,7 +243,7 @@ function CodingLabHome() {
               </button>
             </div>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Virtual contest mode simulates real interview pressure with a strict countdown timer. Bhai hints and solutions are disabled during the contest.
+              Virtual contest mode simulates real interview pressure with a strict countdown timer. OM hints and solutions are disabled during the contest.
             </p>
             <div className="space-y-2">
               <label className="text-2xs uppercase tracking-wider text-text-tertiary font-semibold">Duration</label>
@@ -339,6 +340,18 @@ function ProblemWorkspace() {
   const repeatedMistakePattern = useMemo(() => {
     return checkRepeatedMistakes(attempts, problem);
   }, [attempts, problem]);
+
+  // Contextual Next-Code Suggestion (Pedagogical Scaffolding)
+  const [suggestionMode, setSuggestionMode] = useState<CodeSuggestionMode>('LIGHT');
+  const contextualSuggestion = useMemo(() => {
+    return getContextualCodeSuggestion(editorCode, problem, currentLanguage, suggestionMode);
+  }, [editorCode, problem, currentLanguage, suggestionMode]);
+
+  const handleInsertSuggestion = (codeToInsert: string) => {
+    const newCode = editorCode ? `${editorCode.trimEnd()}\n\n${codeToInsert}\n` : `${codeToInsert}\n`;
+    setEditorCode(newCode);
+    soundManager.play('click');
+  };
 
   const handleEditorMount = (editor: any) => {
     editorRef.current = editor;
@@ -445,7 +458,7 @@ function ProblemWorkspace() {
               mobileTab === tab ? 'bg-surface-4 text-text-primary' : 'text-text-tertiary'
             }`}
           >
-            {tab === 'bhai' ? 'Bhai Coach' : tab}
+            {tab === 'bhai' ? 'OM Coach' : tab}
           </button>
         ))}
       </div>
@@ -567,6 +580,34 @@ function ProblemWorkspace() {
             />
           </div>
 
+          {/* Contextual Next-Code Suggestion Banner (Pedagogical Scaffolding) */}
+          {contextualSuggestion && mode === 'learning' && (
+            <div className="px-3 sm:px-4 py-2.5 bg-surface-2 border-t border-accent-copper/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shrink-0 animate-fade-in">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-accent-copper/20 text-accent-copper border border-accent-copper/40 font-semibold uppercase">
+                    OM Suggestion • {contextualSuggestion.contextLabel}
+                  </span>
+                  <span className="text-3xs text-text-tertiary">
+                    Mode: {suggestionMode}
+                  </span>
+                </div>
+                <p className="text-2xs text-text-secondary leading-snug line-clamp-2">
+                  <strong className="text-accent-copper font-medium">Why this next?</strong> {contextualSuggestion.whyThisNext}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => handleInsertSuggestion(contextualSuggestion.suggestedCode)}
+                  className="px-3 py-1 rounded-full bg-accent-copper text-black font-semibold text-2xs hover:bg-accent-copper/90 transition-colors shadow-sm"
+                >
+                  Insert Code
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Action Toolbar */}
           <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 border-t border-border-default bg-surface-1 shrink-0 overflow-x-auto no-scrollbar max-w-full ${
             mobileTab === 'console' ? 'hidden lg:flex' : 'flex'
@@ -602,6 +643,26 @@ function ProblemWorkspace() {
             >
               <RotateCcw size={12} /> Reset
             </button>
+
+            {/* Contextual Suggestion Mode Switcher */}
+            {mode === 'learning' && (
+              <div className="flex items-center gap-1 bg-surface-2 border border-border-default rounded-full p-0.5 text-3xs ml-1">
+                <span className="text-text-tertiary px-1.5 uppercase font-mono">Guide:</span>
+                {(['OFF', 'LIGHT', 'GUIDED'] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setSuggestionMode(m)}
+                    className={`px-2 py-0.5 rounded-full font-mono transition-all ${
+                      suggestionMode === m
+                        ? 'bg-accent-copper text-black font-bold'
+                        : 'text-text-tertiary hover:text-text-secondary'
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="flex-1" />
 
@@ -788,7 +849,7 @@ function ProblemWorkspace() {
           </div>
         </div>
 
-        {/* RIGHT: Bhai Coding Coach Panel */}
+        {/* RIGHT: OM Mentor Panel */}
         <div
           className={`shrink-0 border-l border-border-default overflow-y-auto bg-surface-1 w-full lg:w-[320px] xl:w-[350px] ${
             mobileTab !== 'bhai' ? 'hidden lg:block' : 'block'
@@ -799,9 +860,9 @@ function ProblemWorkspace() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-accent-copper/20 flex items-center justify-center text-accent-copper font-bold text-xs">
-                  भ
+                  ॐ
                 </div>
-                <h3 className="text-sm font-semibold text-text-primary">Bhai Coding Coach</h3>
+                <h3 className="text-sm font-semibold text-text-primary">OM Mentor</h3>
               </div>
               <span className="text-3xs text-accent-copper uppercase font-semibold tracking-wider">
                 {mode === 'learning' ? 'Active Guide' : 'Contest Locked'}
@@ -955,7 +1016,7 @@ function ProblemWorkspace() {
           <div className="bg-surface-2 border border-border-default rounded-[12px] p-6 max-w-sm w-full space-y-4 animate-scale-up">
             <h4 className="text-sm font-semibold text-text-primary">Reveal Full Solution?</h4>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Bhai recommends trying Hints 1 through 4 first. Are you sure you want to reveal the complete code now?
+              OM recommends trying Hints 1 through 4 first. Are you sure you want to reveal the complete code now?
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <button

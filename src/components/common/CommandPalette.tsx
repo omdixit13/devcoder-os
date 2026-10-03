@@ -35,14 +35,18 @@ export default function CommandPalette() {
     { id: 'internships', label: 'Find internships', icon: <Briefcase size={16} />, action: () => setCurrentPage('opportunities'), category: 'Actions' },
     { id: 'review', label: 'Review concepts', description: 'Spaced repetition review', icon: <Zap size={16} />, action: () => setCurrentPage('learning'), category: 'Actions' },
     { id: 'open-roadmap', label: 'Open roadmap', description: 'Visual skill map & progression', icon: <Map size={16} />, action: () => setCurrentPage('roadmap'), category: 'Navigation' },
-    { id: 'ask-bhai', label: 'Ask Bhai', description: 'Open AI senior tutor chat', icon: <MessageCircle size={16} />, action: () => setCurrentPage('bhai'), category: 'Actions', shortcut: 'B' },
+    { id: 'sirs-sheet', label: "Sir's Practice Sheet", description: '29 exact syllabus problems', icon: <FileText size={16} />, action: () => setCurrentPage('sirsheet'), category: 'Navigation', shortcut: 'S' },
+    { id: 'exam-simulator', label: '90-Min Exam Simulator', description: 'Timed mock without hints', icon: <Play size={16} />, action: () => setCurrentPage('examsimulator'), category: 'Actions', shortcut: 'E' },
+    { id: 'tech-news', label: 'Tech News', description: 'Verified developer releases & intelligence', icon: <FileText size={16} />, action: () => setCurrentPage('technews'), category: 'Navigation' },
+    { id: 'cybersecurity', label: 'Cybersecurity', description: 'Authorized labs & defense modules', icon: <Trophy size={16} />, action: () => setCurrentPage('cybersecurity'), category: 'Navigation' },
+    { id: 'ask-om', label: 'Ask OM', description: 'Open AI senior mentor chat', icon: <MessageCircle size={16} />, action: () => setCurrentPage('om'), category: 'Actions', shortcut: 'O' },
     { id: 'compass', label: 'Open Career Compass', description: 'Discover your technical interest signals', icon: <Compass size={16} />, action: () => setCurrentPage('compass'), category: 'Navigation', shortcut: 'C' },
     { id: 'practice', label: 'Practice Problems', icon: <Dumbbell size={16} />, action: () => setCurrentPage('practice'), category: 'Navigation' },
     { id: 'applications', label: 'My Applications', icon: <Briefcase size={16} />, action: () => setCurrentPage('applications'), category: 'Navigation' },
     { id: 'analytics', label: 'View Analytics', icon: <BarChart3 size={16} />, action: () => setCurrentPage('analytics'), category: 'Navigation' },
     { id: 'settings', label: 'Settings', icon: <Settings size={16} />, action: () => setCurrentPage('settings'), category: 'Navigation' },
     { id: 'mistakes', label: 'Mistake Notebook', icon: <FileText size={16} />, action: () => setCurrentPage('mistakes'), category: 'Actions' },
-    { id: 'teach-bs', label: 'Bhai, teach me Binary Search', icon: <MessageCircle size={16} />, action: () => { setBhaiTeachingConcept('bs-intro'); setCurrentPage('bhai'); }, category: 'Learn' },
+    { id: 'teach-bs', label: 'OM, teach me Binary Search', icon: <MessageCircle size={16} />, action: () => { setBhaiTeachingConcept('bs-intro'); setCurrentPage('om'); }, category: 'Learn' },
   ], [setCurrentPage, setBhaiTeachingConcept]);
 
   const filtered = useMemo(() => {

@@ -23,6 +23,11 @@ import BhaiPage from './pages/Bhai';
 import SettingsPage from './pages/Settings';
 import CareerCompassPage from './pages/CareerCompass';
 import CodingLabPage from './pages/CodingLab';
+import SirsSheetPage from './pages/SirsSheet';
+import ExamSimulatorPage from './pages/ExamSimulator';
+import TechNewsPage from './pages/TechNews';
+import CybersecurityPage from './pages/Cybersecurity';
+import OmPage from './pages/Om';
 
 const pageComponents: Record<string, React.FC> = {
   home: HomePage,
@@ -36,9 +41,14 @@ const pageComponents: Record<string, React.FC> = {
   mistakes: MistakesPage,
   github: GitHubPage,
   analytics: AnalyticsPage,
-  bhai: BhaiPage,
+  bhai: OmPage,
+  om: OmPage,
   settings: SettingsPage,
   codinglab: CodingLabPage,
+  sirsheet: SirsSheetPage,
+  examsimulator: ExamSimulatorPage,
+  technews: TechNewsPage,
+  cybersecurity: CybersecurityPage,
 };
 
 export default function App() {

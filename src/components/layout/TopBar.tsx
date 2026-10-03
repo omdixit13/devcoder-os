@@ -18,11 +18,16 @@ export default function TopBar() {
     practice: 'Practice',
     compass: 'Career Compass',
     codinglab: 'Coding Lab',
+    sirsheet: "Sir's Practice Sheet",
+    examsimulator: '90-Min Exam Simulator',
+    technews: 'Tech News',
+    cybersecurity: 'Cybersecurity',
     applications: 'Applications',
     mistakes: 'Mistake Notebook',
     github: 'GitHub',
     analytics: 'Analytics',
-    bhai: 'Bhai — AI Tutor',
+    om: 'OM — Senior Mentor',
+    bhai: 'OM — Senior Mentor',
     settings: 'Settings',
   };
 
