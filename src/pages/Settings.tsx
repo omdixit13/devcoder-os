@@ -10,6 +10,9 @@ import { soundManager } from '../utils/soundManager';
 import { triggerConfetti } from '../utils/confetti';
 import { normalizeProfileUrl } from '../utils/urlValidator';
 import { requestNotificationPermission, sendNotification } from '../utils/notificationService';
+import { authService, type AuthUser } from '../services/authService';
+import { isRidhimaProfile } from '../utils/mentorPersonalization';
+import type { MentorAddressStyle } from '../types';
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState('profile');
@@ -39,31 +42,94 @@ export default function SettingsPage() {
   const [formRole, setFormRole] = useState(userRole || 'B.Tech CSE');
   const [formCollege, setFormCollege] = useState(userCollege || 'Computer Science & Engineering');
 
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(authService.getCurrentUser());
+  const [mentorStyle, setMentorStyle] = useState<MentorAddressStyle>(currentUser?.mentorAddressStyle || 'neutral');
+  const [accountAlert, setAccountAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
   useEffect(() => {
     setFormName(userName);
     setFormGithub(githubProfileUrl);
     setFormLeetcode(leetcodeProfileUrl);
     setFormRole(userRole || 'B.Tech CSE');
     setFormCollege(userCollege || 'Computer Science & Engineering');
+    const u = authService.getCurrentUser();
+    if (u) {
+      setCurrentUser(u);
+      setMentorStyle(u.mentorAddressStyle || 'neutral');
+    }
   }, [userName, githubProfileUrl, leetcodeProfileUrl, userRole, userCollege]);
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     const ghUrl = normalizeProfileUrl(formGithub, 'github');
     const lcUrl = normalizeProfileUrl(formLeetcode, 'leetcode');
+    const cleanName = formName.trim() || 'Developer';
+
     updateUserProfile({
-      userName: formName.trim() || 'Developer',
+      userName: cleanName,
       githubProfileUrl: ghUrl,
       leetcodeProfileUrl: lcUrl,
       userRole: formRole.trim(),
       userCollege: formCollege.trim(),
       isProfileConnected: Boolean(ghUrl || lcUrl),
     });
+
+    const updated = authService.updateProfile({
+      displayName: cleanName,
+      role: formRole.trim(),
+      college: formCollege.trim(),
+      githubProfileUrl: ghUrl,
+      leetcodeProfileUrl: lcUrl,
+      mentorAddressStyle: mentorStyle,
+    });
+    if (updated) setCurrentUser(updated);
+
     setFormGithub(ghUrl);
     setFormLeetcode(lcUrl);
     soundManager.play('taskCompleted');
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 2500);
+  };
+
+  const handleConnectAccount = (provider: 'google' | 'github') => {
+    const { googleConfigured, githubConfigured } = authService.getOAuthConfigurationStatus();
+    soundManager.play('click');
+
+    if (provider === 'google' && !googleConfigured) {
+      setAccountAlert({
+        type: 'info',
+        message: 'Google OAuth is not configured in this environment (missing VITE_GOOGLE_CLIENT_ID). Please set the client ID or sign in via Email/Password.',
+      });
+      return;
+    }
+
+    if (provider === 'github' && !githubConfigured) {
+      setAccountAlert({
+        type: 'info',
+        message: 'GitHub OAuth is not configured in this environment (missing VITE_GITHUB_CLIENT_ID). You can enter your public GitHub username in the profile field above.',
+      });
+      return;
+    }
+  };
+
+  const handleDisconnectAccount = (provider: 'google' | 'github') => {
+    soundManager.play('click');
+    const res = authService.unlinkAccount(provider);
+    if (!res.success) {
+      setAccountAlert({
+        type: 'error',
+        message: res.error || 'Failed to disconnect account.',
+      });
+      soundManager.play('error');
+    } else {
+      setCurrentUser(res.user || authService.getCurrentUser());
+      setAccountAlert({
+        type: 'success',
+        message: `Successfully disconnected ${provider}.`,
+      });
+      soundManager.play('taskCompleted');
+      setTimeout(() => setAccountAlert(null), 3000);
+    }
   };
 
   const sections = [
@@ -272,6 +338,162 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </form>
+
+              {/* CONNECTED ACCOUNTS (Spec Section 17) */}
+              <div className="bg-surface-2 border border-border-default rounded-[10px] p-5 space-y-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-text-primary mb-1">Connected Accounts</h4>
+                  <p className="text-xs text-text-tertiary">
+                    Link multiple authentication providers to your single DevCareer OS profile.
+                  </p>
+                </div>
+
+                {accountAlert && (
+                  <div className={`p-3 rounded-[8px] text-xs ${
+                    accountAlert.type === 'error' ? 'bg-accent-red/10 text-accent-red border border-accent-red/20' :
+                    accountAlert.type === 'success' ? 'bg-accent-green/10 text-accent-green border border-accent-green/20' :
+                    'bg-accent-blue/10 text-accent-blue border border-accent-blue/20'
+                  }`}>
+                    {accountAlert.message}
+                  </div>
+                )}
+
+                {/* Google Row */}
+                {(() => {
+                  const googleProvider = currentUser?.linkedProviders?.find(p => p.provider === 'google');
+                  return (
+                    <div className="flex items-center justify-between p-3 rounded-[8px] bg-surface-3 border border-border-subtle">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-surface-4 flex items-center justify-center font-bold text-xs text-accent-copper">
+                          G
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-text-primary">Google</div>
+                          <div className="text-2xs text-text-tertiary">
+                            {googleProvider ? `Connected (${googleProvider.email || 'Verified'})` : 'Not connected'}
+                          </div>
+                        </div>
+                      </div>
+                      {googleProvider ? (
+                        <button
+                          type="button"
+                          onClick={() => handleDisconnectAccount('google')}
+                          className="px-3 py-1.5 rounded-full border border-accent-red/30 text-accent-red hover:bg-accent-red/10 text-2xs font-semibold transition-colors"
+                        >
+                          Disconnect
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleConnectAccount('google')}
+                          className="px-3 py-1.5 rounded-full bg-surface-4 hover:bg-surface-2 text-text-primary text-2xs font-semibold border border-border-default transition-colors"
+                        >
+                          Connect
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* GitHub Row */}
+                {(() => {
+                  const githubProvider = currentUser?.linkedProviders?.find(p => p.provider === 'github');
+                  return (
+                    <div className="flex items-center justify-between p-3 rounded-[8px] bg-surface-3 border border-border-subtle">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-surface-4 flex items-center justify-center font-bold text-xs text-accent-blue">
+                          gh
+                        </div>
+                        <div>
+                          <div className="text-xs font-medium text-text-primary">GitHub</div>
+                          <div className="text-2xs text-text-tertiary">
+                            {githubProvider ? `Connected (${githubProvider.username || 'Verified'})` : 'Not connected'}
+                          </div>
+                        </div>
+                      </div>
+                      {githubProvider ? (
+                        <button
+                          type="button"
+                          onClick={() => handleDisconnectAccount('github')}
+                          className="px-3 py-1.5 rounded-full border border-accent-red/30 text-accent-red hover:bg-accent-red/10 text-2xs font-semibold transition-colors"
+                        >
+                          Disconnect
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleConnectAccount('github')}
+                          className="px-3 py-1.5 rounded-full bg-surface-4 hover:bg-surface-2 text-text-primary text-2xs font-semibold border border-border-default transition-colors"
+                        >
+                          Connect
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* SENIOR MENTOR OM ADDRESSING STYLE (Spec Section 21 & 22) */}
+              <div className="bg-surface-2 border border-border-default rounded-[10px] p-5 space-y-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-text-primary mb-1">Senior Mentor OM Addressing Style</h4>
+                  <p className="text-xs text-text-tertiary">
+                    Controls how OM greets and addresses you during coding lab hints, error reviews, and personalized coaching.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap pt-1">
+                  {formName.trim() === 'Ridhima' ? (
+                    // Strictly available ONLY if exact displayName === 'Ridhima' (Spec Section 21 & 22)
+                    (['baby', 'jaanu', 'babu', 'name', 'neutral'] as const).map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => {
+                          setMentorStyle(style);
+                          authService.setMentorAddressStyle(style);
+                          soundManager.play('click');
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-2xs font-medium capitalize border transition-all ${
+                          mentorStyle === style
+                            ? 'bg-accent-copper text-black font-bold border-accent-copper shadow-sm'
+                            : 'bg-surface-3 text-text-secondary border-border-default hover:border-border-strong'
+                        }`}
+                      >
+                        {style === 'baby' ? 'Baby (Affectionate)' :
+                         style === 'jaanu' ? 'Jaanu (Affectionate)' :
+                         style === 'babu' ? 'Babu (Affectionate)' :
+                         style === 'name' ? 'Name (Ridhima)' : 'Neutral (Dost)'}
+                      </button>
+                    ))
+                  ) : (
+                    // For all other users: strictly name or neutral (Spec Section 21)
+                    (['name', 'neutral'] as const).map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => {
+                          setMentorStyle(style);
+                          authService.setMentorAddressStyle(style);
+                          soundManager.play('click');
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-2xs font-medium capitalize border transition-all ${
+                          mentorStyle === style
+                            ? 'bg-accent-copper text-black font-bold border-accent-copper shadow-sm'
+                            : 'bg-surface-3 text-text-secondary border-border-default hover:border-border-strong'
+                        }`}
+                      >
+                        {style === 'name' ? `Name (${formName || 'Developer'})` : 'Neutral (Dost)'}
+                      </button>
+                    ))
+                  )}
+                </div>
+                <div className="text-3xs text-text-quaternary italic pt-1">
+                  {formName.trim() === 'Ridhima'
+                    ? 'Special preferred petname addressing enabled for authenticated Ridhima profile.'
+                    : 'Standard senior peer mentor tone with respectful first-name or neutral salutation.'}
+                </div>
+              </div>
             </div>
           )}
 

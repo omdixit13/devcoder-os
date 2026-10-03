@@ -413,3 +413,44 @@ export interface TechNewsArticle {
   verified: boolean;
   saved?: boolean;
 }
+
+// --- Account Linking & Single User Profile ---
+export interface LinkedProvider {
+  provider: 'google' | 'github';
+  providerId: string;
+  email?: string;
+  username?: string;
+  avatarUrl?: string;
+  linkedAt: string;
+}
+
+export type MentorAddressStyle = 'neutral' | 'name' | 'baby' | 'jaanu' | 'babu';
+
+export interface UserProfileData {
+  id: string;
+  displayName: string;
+  email: string;
+  avatar?: string;
+  role: string;
+  college: string;
+  githubProfileUrl: string;
+  leetcodeProfileUrl: string;
+  targetCareer: string;
+  careerInterests: string[];
+  skills: string[];
+  roadmap: string;
+  studyPreferences: {
+    weeklyStudyHours: number;
+    preferredLanguage: 'python' | 'cpp' | 'java' | 'javascript';
+  };
+  notificationPreferences: {
+    emailNotifications: boolean;
+    streakReminders: boolean;
+    deadlineAlerts: boolean;
+  };
+  mentorAddressStyle: MentorAddressStyle;
+  linkedProviders: LinkedProvider[];
+  createdAt: string;
+  updatedAt?: string;
+}
+

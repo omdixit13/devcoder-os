@@ -506,7 +506,7 @@ export const useAppStore = create<AppState>()(
         {
           id: 'welcome',
           role: 'bhai',
-          content: 'Namaste dost! Main Bhai hoon — aapka personal learning companion aur coding coach. DSA, system design, debugging ya career path — bas pooch lijiye. Chaliye, aaj kya solid seekhte hain?',
+          content: 'Namaste! Main OM hoon — aapka personal learning companion aur coding coach. DSA, system design, debugging ya career path — bas pooch lijiye. Chaliye, aaj kya solid seekhte hain?',
           timestamp: new Date().toISOString(),
           type: 'text',
         }

@@ -19,6 +19,10 @@ import {
   getStructuredHint,
 } from '../utils/bhaiCodingCoach';
 import { getContextualCodeSuggestion, type CodeSuggestionMode } from '../utils/codeSuggestionService';
+import CustomTestCaseBuilder from '../components/codingLab/CustomTestCaseBuilder';
+import CodingEngineDiagnosticsModal from '../components/codingLab/CodingEngineDiagnosticsModal';
+import { getMentorAddress, formatOmHintIntro, formatOmErrorFeedback, isRidhimaProfile } from '../utils/mentorPersonalization';
+import { authService } from '../services/authService';
 
 // ===== Difficulty Badge =====
 const diffColors: Record<ProblemDifficulty, { bg: string; text: string }> = {
@@ -307,8 +311,12 @@ function ProblemWorkspace() {
   const { setCurrentPage } = useAppStore();
 
   const editorRef = useRef<any>(null);
-  const [mobileTab, setMobileTab] = useState<'problem' | 'code' | 'bhai' | 'console'>('code');
+  const [mobileTab, setMobileTab] = useState<'problem' | 'code' | 'console' | 'om'>('code');
   const [showSolutionConfirm, setShowSolutionConfirm] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [customInputMode, setCustomInputMode] = useState<'builder' | 'raw'>('builder');
+  const currentUser = authService.getCurrentUser();
+  const mentorSalutation = getMentorAddress(currentUser, 'hint');
 
   // Contest timer ticker
   useEffect(() => {
@@ -436,11 +444,21 @@ function ProblemWorkspace() {
           </button>
         </div>
 
+        {/* Diagnostics Button (Spec Section 12) */}
+        <button
+          onClick={() => setShowDiagnostics(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-3 hover:bg-surface-4 text-text-tertiary hover:text-text-primary text-2xs transition-colors border border-border-default shrink-0"
+          title="Open Coding Engine Status & Diagnostics"
+        >
+          <Cpu size={12} className="text-accent-copper" />
+          <span className="hidden sm:inline">Engine Status</span>
+        </button>
+
         {/* Language selector */}
         <select
           value={currentLanguage}
           onChange={e => setLanguage(e.target.value as SupportedLanguage)}
-          className="bg-surface-3 border border-border-default rounded-full px-3 py-1 text-2xs text-text-primary outline-none focus:border-border-strong cursor-pointer"
+          className="bg-surface-3 border border-border-default rounded-full px-3 py-1 text-2xs text-text-primary outline-none focus:border-border-strong cursor-pointer shrink-0"
         >
           {availableLanguages.map(l => (
             <option key={l} value={l}>{LANGUAGE_CONFIGS[l].name}</option>
@@ -448,17 +466,17 @@ function ProblemWorkspace() {
         </select>
       </div>
 
-      {/* Mobile Tab Switcher (Visible only on < lg screens) */}
+      {/* Mobile Tab Switcher (Visible only on < lg screens - Spec Section 28) */}
       <div className="lg:hidden flex items-center justify-around border-b border-border-default bg-surface-2 p-1 shrink-0">
-        {(['problem', 'code', 'bhai', 'console'] as const).map(tab => (
+        {(['problem', 'code', 'console', 'om'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setMobileTab(tab)}
-            className={`px-3 py-1.5 text-2xs font-medium rounded-full capitalize transition-all ${
-              mobileTab === tab ? 'bg-surface-4 text-text-primary' : 'text-text-tertiary'
+            className={`px-3 py-1.5 text-2xs font-medium rounded-full uppercase tracking-wider transition-all ${
+              mobileTab === tab ? 'bg-surface-4 text-text-primary font-bold' : 'text-text-tertiary'
             }`}
           >
-            {tab === 'bhai' ? 'OM Coach' : tab}
+            {tab === 'om' ? 'OM' : tab}
           </button>
         ))}
       </div>
@@ -795,20 +813,61 @@ function ProblemWorkspace() {
               )}
 
               {consoleTab === 'custom' && (
-                <div className="space-y-2 font-sans">
-                  <textarea
-                    value={customInput}
-                    onChange={e => setCustomInput(e.target.value)}
-                    placeholder="Enter custom input (stdin) to test your code with specific arguments..."
-                    className="w-full h-24 bg-surface-2 border border-border-default rounded-[8px] p-3 font-mono text-2xs text-text-primary outline-none focus:border-border-strong resize-none"
-                  />
-                  <button
-                    onClick={() => runCode(customInput)}
-                    disabled={isExecuting}
-                    className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-accent-green/10 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors disabled:opacity-40"
-                  >
-                    <Play size={12} /> Run with Custom Input
-                  </button>
+                <div className="space-y-3 font-sans">
+                  {/* Mode Switcher */}
+                  <div className="flex items-center justify-between pb-2 border-b border-border-default">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xs font-semibold text-text-tertiary uppercase tracking-wider">
+                        Testing Mode:
+                      </span>
+                      <div className="flex items-center bg-surface-2 rounded-full p-0.5 border border-border-default text-3xs font-mono">
+                        <button
+                          onClick={() => setCustomInputMode('builder')}
+                          className={`px-2.5 py-1 rounded-full transition-all ${
+                            customInputMode === 'builder'
+                              ? 'bg-accent-copper text-black font-bold shadow-sm'
+                              : 'text-text-tertiary hover:text-text-secondary'
+                          }`}
+                        >
+                          Structured Builder (3 Tests)
+                        </button>
+                        <button
+                          onClick={() => setCustomInputMode('raw')}
+                          className={`px-2.5 py-1 rounded-full transition-all ${
+                            customInputMode === 'raw'
+                              ? 'bg-surface-4 text-text-primary font-bold shadow-sm'
+                              : 'text-text-tertiary hover:text-text-secondary'
+                          }`}
+                        >
+                          Raw Stdin
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {customInputMode === 'builder' ? (
+                    <CustomTestCaseBuilder
+                      editorCode={editorCode}
+                      currentLanguage={currentLanguage}
+                      problemTitle={problem.title}
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      <textarea
+                        value={customInput}
+                        onChange={e => setCustomInput(e.target.value)}
+                        placeholder="Enter custom input (stdin) lines to test directly against your Python code..."
+                        className="w-full h-28 bg-surface-2 border border-border-default rounded-[8px] p-3 font-mono text-2xs text-text-primary outline-none focus:border-border-strong resize-none"
+                      />
+                      <button
+                        onClick={() => runCode(customInput)}
+                        disabled={isExecuting}
+                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-accent-green/10 text-accent-green text-xs font-medium hover:bg-accent-green/20 transition-colors disabled:opacity-40"
+                      >
+                        <Play size={12} /> Run with Raw Stdin
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -852,7 +911,7 @@ function ProblemWorkspace() {
         {/* RIGHT: OM Mentor Panel */}
         <div
           className={`shrink-0 border-l border-border-default overflow-y-auto bg-surface-1 w-full lg:w-[320px] xl:w-[350px] ${
-            mobileTab !== 'bhai' ? 'hidden lg:block' : 'block'
+            mobileTab !== 'om' ? 'hidden lg:block' : 'block'
           }`}
         >
           <div className="p-4 space-y-4">
@@ -862,11 +921,16 @@ function ProblemWorkspace() {
                 <div className="w-6 h-6 rounded-full bg-accent-copper/20 flex items-center justify-center text-accent-copper font-bold text-xs">
                   ॐ
                 </div>
-                <h3 className="text-sm font-semibold text-text-primary">OM Mentor</h3>
+                <h3 className="text-sm font-semibold text-text-primary">OM Senior Mentor</h3>
               </div>
               <span className="text-3xs text-accent-copper uppercase font-semibold tracking-wider">
-                {mode === 'learning' ? 'Active Guide' : 'Contest Locked'}
+                {mode === 'learning' ? 'Active Coach' : 'Contest Locked'}
               </span>
+            </div>
+
+            {/* Personalized Welcome Callout */}
+            <div className="p-2.5 rounded-[8px] bg-surface-2 border border-border-subtle text-2xs text-text-secondary leading-relaxed">
+              <span className="font-semibold text-accent-copper">{mentorSalutation}</span>, pehle problem statement aur input constraints ko identify karte hain.
             </div>
 
             {/* Contest Rule Notification if Contest Mode */}
@@ -879,7 +943,7 @@ function ProblemWorkspace() {
               </div>
             )}
 
-            {/* Repeated Mistake Pattern Alert (Phase 8) */}
+            {/* Repeated Mistake Pattern Alert */}
             {repeatedMistakePattern && (
               <div className="bg-accent-yellow/10 border border-accent-yellow/30 rounded-[10px] p-3 space-y-2 animate-fade-in">
                 <div className="text-2xs font-semibold text-accent-yellow flex items-center gap-1.5">
@@ -896,9 +960,7 @@ function ProblemWorkspace() {
                     Review {repeatedMistakePattern.topic}
                   </button>
                   <button
-                    onClick={() => {
-                      setLabView('home');
-                    }}
+                    onClick={() => setLabView('home')}
                     className="w-full text-center px-3 py-1 rounded-full bg-surface-3 text-text-secondary text-2xs hover:text-text-primary"
                   >
                     Try Easier Problem
@@ -919,25 +981,44 @@ function ProblemWorkspace() {
               </div>
             )}
 
-            {/* Error Guidance if Execution Failed */}
-            {failureAdvice && mode === 'learning' && (
-              <div className="bg-surface-2 border border-border-default rounded-[10px] p-3 space-y-1.5 animate-fade-in">
-                <div className="text-2xs font-semibold text-text-primary flex items-center gap-1">
-                  <HelpCircle size={12} className="text-accent-blue" />
-                  {failureAdvice.headline}
-                </div>
-                <p className="text-2xs text-text-secondary leading-relaxed whitespace-pre-wrap">
-                  {failureAdvice.message}
-                </p>
-              </div>
+            {/* Error Guidance (Spec Section 11: WHAT HAPPENED / WHY / HOW TO FIX) */}
+            {executionResult && executionResult.status !== 'passed' && executionResult.status !== 'idle' && mode === 'learning' && (
+              (() => {
+                const fb = formatOmErrorFeedback({
+                  errorType: executionResult.status,
+                  errorMessage: executionResult.stderr || executionResult.compilationError || '',
+                  user: currentUser,
+                });
+                return (
+                  <div className="bg-surface-2 border border-accent-red/30 rounded-[10px] p-3.5 space-y-2 animate-fade-in">
+                    <div className="text-2xs font-semibold text-accent-red flex items-center gap-1">
+                      <HelpCircle size={13} /> {fb.address}, execution inspect karte hain:
+                    </div>
+                    <div className="space-y-1.5 text-2xs">
+                      <div>
+                        <span className="font-bold text-accent-copper uppercase tracking-wider text-3xs block">WHAT HAPPENED</span>
+                        <p className="text-text-primary">{fb.whatHappened}</p>
+                      </div>
+                      <div>
+                        <span className="font-bold text-accent-yellow uppercase tracking-wider text-3xs block">WHY</span>
+                        <p className="text-text-secondary">{fb.why}</p>
+                      </div>
+                      <div>
+                        <span className="font-bold text-accent-green uppercase tracking-wider text-3xs block">HOW TO FIX</span>
+                        <p className="text-text-secondary">{fb.howToFix}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()
             )}
 
-            {/* Progressive Hints (Levels 1 to 4) - Learning Mode Only */}
+            {/* Progressive Hints (Spec Section 10: 5 Hints) - Learning Mode Only */}
             {mode === 'learning' && (
               <div className="space-y-3 pt-2 border-t border-border-subtle">
                 <div className="flex items-center justify-between">
                   <span className="text-2xs font-semibold uppercase tracking-wider text-text-tertiary">
-                    Progressive Hints ({currentHintLevel}/4)
+                    Progressive Hints ({currentHintLevel}/5)
                   </span>
                   {currentHintLevel > 0 && (
                     <button onClick={resetHints} className="text-3xs text-text-quaternary hover:text-text-tertiary">
@@ -948,16 +1029,26 @@ function ProblemWorkspace() {
 
                 {/* Render Unlocked Hints */}
                 <div className="space-y-2">
-                  {[1, 2, 3, 4].slice(0, currentHintLevel).map(lvl => {
-                    const hintData = getStructuredHint(problem, lvl);
-                    if (!hintData) return null;
+                  {[1, 2, 3, 4, 5].slice(0, currentHintLevel).map(lvl => {
+                    const titles = [
+                      'HINT 1 — Direction',
+                      'HINT 2 — Observation',
+                      'HINT 3 — Technique',
+                      'HINT 4 — Approach',
+                      'HINT 5 — Pseudocode'
+                    ];
+                    const hintIntro = formatOmHintIntro(lvl, currentUser);
+                    const hintData = getStructuredHint(problem, lvl <= 4 ? lvl : 4);
                     return (
-                      <div key={lvl} className="bg-surface-2 border border-border-subtle rounded-[8px] p-3 text-2xs space-y-1 animate-fade-in">
+                      <div key={lvl} className="bg-surface-2 border border-border-subtle rounded-[8px] p-3 text-2xs space-y-1.5 animate-fade-in">
                         <div className="font-semibold text-accent-copper text-3xs uppercase tracking-wide">
-                          {hintData.levelTitle}
+                          {titles[lvl - 1]}
                         </div>
+                        <p className="text-text-tertiary text-2xs italic">“{hintIntro}”</p>
                         <div className="text-text-secondary whitespace-pre-wrap font-mono text-2xs">
-                          {hintData.content}
+                          {lvl === 5
+                            ? (problem.structuredHints?.pseudocode || 'Initialize pointers left = 0, right = n - 1\nWhile left < right:\n  Calculate current sum\n  If sum == target: return indices\n  If sum < target: left += 1\n  Else: right -= 1')
+                            : hintData?.content}
                         </div>
                       </div>
                     );
@@ -965,7 +1056,7 @@ function ProblemWorkspace() {
                 </div>
 
                 {/* Reveal Next Hint Button */}
-                {currentHintLevel < 4 && (
+                {currentHintLevel < 5 && (
                   <button
                     onClick={revealNextHint}
                     className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-surface-3 border border-border-default text-text-primary text-2xs font-medium hover:bg-surface-4 transition-all"
@@ -975,7 +1066,7 @@ function ProblemWorkspace() {
                   </button>
                 )}
 
-                {/* Explicit Solution Reveal (Phase 5) */}
+                {/* Explicit Solution Reveal */}
                 <div className="pt-2 border-t border-border-subtle">
                   {!isSolutionRevealed ? (
                     <button
@@ -1010,13 +1101,19 @@ function ProblemWorkspace() {
         </div>
       </div>
 
+      {/* Diagnostics Modal (Spec Section 12) */}
+      <CodingEngineDiagnosticsModal
+        isOpen={showDiagnostics}
+        onClose={() => setShowDiagnostics(false)}
+      />
+
       {/* Solution Confirmation Modal */}
       {showSolutionConfirm && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
           <div className="bg-surface-2 border border-border-default rounded-[12px] p-6 max-w-sm w-full space-y-4 animate-scale-up">
             <h4 className="text-sm font-semibold text-text-primary">Reveal Full Solution?</h4>
             <p className="text-xs text-text-secondary leading-relaxed">
-              OM recommends trying Hints 1 through 4 first. Are you sure you want to reveal the complete code now?
+              OM recommends trying Hints 1 through 5 first. Are you sure you want to reveal the complete code now?
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <button

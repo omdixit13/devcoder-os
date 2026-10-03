@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Sparkles, BookOpen, Brain, Lightbulb, RotateCcw, ChevronRight, Terminal, Target } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import type { BhaiMessage } from '../types';
+import { authService } from '../services/authService';
+import { getMentorAddress, isRidhimaProfile } from '../utils/mentorPersonalization';
 
 // OM's Senior Mentor Intelligence Engine
 // Tone: Patient, supportive, clear, human, slightly senior, encouraging.
@@ -10,7 +12,9 @@ function generateOmResponse(
   context: { conceptId?: string | null; messages: BhaiMessage[]; userName?: string }
 ): string {
   const msg = userMessage.toLowerCase().trim();
-  const name = context.userName || 'developer';
+  const currentUser = authService.getCurrentUser();
+  const address = getMentorAddress(currentUser, 'greeting');
+  const isRidhima = isRidhimaProfile(currentUser);
 
   // 1. Prefix Technique
   if (msg.includes('prefix') || context.conceptId?.includes('prefix')) {
@@ -113,25 +117,30 @@ Mock Exam Simulator try karne ke liye sidebar mein **EXAM SIMULATOR** select kij
 
   // Greetings
   if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('namaste')) {
-    return `Hey ${name}! Main OM hoon — aapka senior developer mentor.
-
+    return isRidhima
+      ? `Hey ${address}! Main OM hoon — aapka senior developer mentor.
+Pehle question ko decode karte hain, intuition samajhte hain, aur phir step-by-step solve karte hain.
+Aaj kya solid practice karenge?
+- **Sir's Practice Sheet** ke problem drills?
+- **Prefix Sum** ya **Two Pointers** ke 3 forms?
+- Ya 90-minute **Exam Simulator**?
+Bataiye, chaliye start karte hain! 🚀`
+      : `Hey ${address}! Main OM hoon — aapka senior developer mentor.
 Pehle question ko decode karte hain, intuition samajhte hain, aur phir clean code likhte hain.
 Aaj hum kya master karenge?
 - **Sir's Practice Sheet** ke questions?
 - **Prefix Sum** ya **Two Pointers** ke 3 forms?
 - Ya 90-minute **Exam Simulator** ki strategy?
-
 Bataiye, chaliye start karte hain! 🚀`;
   }
 
   // General encouraging mentor response
-  return `Bahut achha point raise kiya aapne. Ek baar aap khud predict kijiye:
+  return `${address}, ek small observation hai — try kijiye:
+1. **Given kya hai?** (Input format aur constraints dhyan se dekhiye)
+2. **Goal kya hai?** (Expected output format)
+3. **Brute force kya karta?** Aur kahan time complexity bottleneck banegi?
 
-1. **Given kya hai?** (Input format aur constraints)
-2. **Goal kya hai?** (Output requirement)
-3. **Brute force kya karta?** Aur kahan bottleneck aa raha hai?
-
-Aap mujhe apna initial thought bataiye — main step-by-step guide karunga. Close hone par hum optimize karenge! 😊`;
+Aap mujhe apna initial thought bataiye — main step-by-step guide karunga. Ek baar khud try kijiye! 😊`;
 }
 
 export default function OmPage() {

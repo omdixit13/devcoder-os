@@ -1,23 +1,85 @@
+import React, { useMemo } from 'react';
 import {
   Play, Clock, Target, Zap, ChevronRight, BookOpen,
   Trophy, BarChart3, Calendar, ArrowRight, CheckCircle2,
-  Brain, Flame, Timer, Code2, Sparkles, UserPlus
+  Brain, Flame, Timer, Code2, Sparkles, UserPlus, AlertTriangle
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
+import { useCodingLabStore } from '../store/useCodingLabStore';
 import ProfileCard from '../components/common/ProfileCard';
 import ExternalLink from '../components/common/ExternalLink';
 import NotificationPermissionPrompt from '../components/notifications/NotificationPermissionPrompt';
 import { soundManager } from '../utils/soundManager';
 import { getTimeGreeting } from '../utils/greetingUtils';
+import { calculateRealStreak } from '../utils/streakUtils';
+import { authService } from '../services/authService';
+import { getMentorAddress } from '../utils/mentorPersonalization';
 
 export default function HomePage() {
   const { 
     userName, dailyStats, reviews, opportunities, skills, contests,
-    setCurrentPage, problems, isProfileConnected, setLoginModalOpen 
+    setCurrentPage, problems, isProfileConnected, setLoginModalOpen, mistakes
   } = useAppStore();
-  
+
+  const { attempts, savedDrafts, problems: labProblems, selectProblem } = useCodingLabStore();
+
   const now = new Date();
-  const timeGreeting = getTimeGreeting(userName);
+  const currentUser = authService.getCurrentUser();
+  const mentorSalutation = getMentorAddress(currentUser, 'greeting');
+  const timeGreeting = getTimeGreeting(currentUser?.displayName || userName);
+
+  // Real Coding Streak from real attempt timestamps (Spec Section 23)
+  const realStreak = useMemo(() => {
+    const timestamps = attempts.map(a => a.timestamp);
+    return calculateRealStreak(timestamps);
+  }, [attempts]);
+
+  // Last Problem / Continue Where Left Off (Spec Section 23 & 31)
+  const lastWorkedInfo = useMemo(() => {
+    if (attempts.length > 0) {
+      const last = attempts[0];
+      const prob = labProblems.find(p => p.id === last.problemId);
+      if (prob) {
+        return {
+          problemId: prob.id,
+          title: prob.title,
+          language: last.language,
+          date: last.timestamp,
+          status: last.status,
+          codeSnippet: last.code.slice(0, 100),
+        };
+      }
+    }
+    const draftKeys = Object.keys(savedDrafts);
+    if (draftKeys.length > 0) {
+      const pId = draftKeys[0];
+      const prob = labProblems.find(p => p.id === pId);
+      if (prob) {
+        const lang = Object.keys(savedDrafts[pId])[0] || 'python';
+        return {
+          problemId: prob.id,
+          title: prob.title,
+          language: lang,
+          date: new Date().toISOString(),
+          status: 'draft',
+          codeSnippet: savedDrafts[pId][lang]?.slice(0, 100) || '',
+        };
+      }
+    }
+    return null;
+  }, [attempts, savedDrafts, labProblems]);
+
+  // Weak Topics from Mistakes (Spec Section 23)
+  const weakTopics = useMemo(() => {
+    const map: Record<string, number> = {};
+    mistakes.forEach(m => {
+      (m.tags || []).forEach(t => {
+        const cleanTag = t.replace(/-/g, ' ');
+        map[cleanTag] = (map[cleanTag] || 0) + 1;
+      });
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  }, [mistakes]);
   
   const dueReviews = reviews.filter(r => new Date(r.nextReview) <= now);
   const upcomingOpps = opportunities
@@ -112,6 +174,39 @@ export default function HomePage() {
 
           {/* Persistent Personal Profile Card */}
           <ProfileCard />
+
+          {/* CONTINUE WHERE YOU LEFT OFF (Spec Section 23 & 31) */}
+          {lastWorkedInfo && (
+            <div className="bg-surface-2 border border-border-default rounded-[12px] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in shadow-sm">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-accent-copper/20 text-accent-copper flex items-center justify-center shrink-0 border border-accent-copper/30">
+                  <Code2 size={20} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-2xs font-semibold text-accent-copper uppercase tracking-wider">
+                    Continue Where You Left Off
+                  </div>
+                  <div className="text-sm font-semibold text-text-primary truncate">
+                    {lastWorkedInfo.title}
+                  </div>
+                  <div className="text-2xs text-text-tertiary">
+                    {lastWorkedInfo.language.toUpperCase()} • {lastWorkedInfo.status === 'draft' ? 'Draft preserved from session' : `Last status: ${lastWorkedInfo.status.replace('_', ' ')}`}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  selectProblem(lastWorkedInfo.problemId);
+                  setCurrentPage('codinglab');
+                  soundManager.play('click');
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-full bg-accent-copper text-black font-semibold text-xs hover:bg-accent-copper/90 transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-sm"
+              >
+                <span>Resume Coding</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* NEXT MOVE — Primary CTA */}
@@ -182,9 +277,9 @@ export default function HomePage() {
             />
             <StatCard 
               icon={<Flame size={16} />} 
-              label="Streak" 
-              value="7 days" 
-              color="text-accent-red" 
+              label="Real Streak" 
+              value={`${realStreak.currentStreak} day${realStreak.currentStreak === 1 ? '' : 's'}`} 
+              color={realStreak.currentStreak > 0 ? 'text-accent-red' : 'text-text-tertiary'} 
             />
           </div>
         </div>
@@ -211,6 +306,42 @@ export default function HomePage() {
                     <span className="text-sm text-text-secondary">{r.conceptName}</span>
                     <span className="text-2xs text-text-tertiary">~5 min recall</span>
                   </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Weak Topics Needing Revision (Spec Section 23) */}
+        {weakTopics.length > 0 && (
+          <div className="animate-slide-up" style={{ animationDelay: '175ms' }}>
+            <div className="bg-surface-2 border border-border-default rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={15} className="text-accent-yellow" />
+                  <span className="text-xs font-semibold text-text-primary uppercase tracking-wider">
+                    Weak Topics Identified by OM
+                  </span>
+                </div>
+                <button
+                  onClick={() => setCurrentPage('mistakes')}
+                  className="text-2xs text-accent-yellow hover:underline flex items-center gap-1"
+                >
+                  Mistakes Book <ChevronRight size={12} />
+                </button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {weakTopics.map(([topic, count]) => (
+                  <button
+                    key={topic}
+                    onClick={() => setCurrentPage('codinglab')}
+                    className="px-3 py-1.5 rounded-full bg-surface-3 border border-border-subtle hover:border-border-strong text-2xs flex items-center gap-2 text-text-secondary hover:text-text-primary transition-all"
+                  >
+                    <span>{topic}</span>
+                    <span className="text-3xs px-1.5 py-0.5 rounded-full bg-accent-yellow/20 text-accent-yellow font-bold">
+                      {count} {count === 1 ? 'mistake' : 'mistakes'}
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>
