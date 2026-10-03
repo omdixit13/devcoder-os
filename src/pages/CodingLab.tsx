@@ -6,7 +6,7 @@ import {
   BookOpen, Zap, Timer, FileCode, ChevronDown, Send, Cpu,
   Sparkles, ShieldAlert, Compass, RefreshCw, Trophy, Flag, Eye,
   Lock, ArrowUpRight, HelpCircle, Layers, Check, Copy, Flame,
-  ExternalLink, Plus, Trash2
+  ExternalLink, Plus, Trash2, Brain
 } from 'lucide-react';
 import { useCodingLabStore } from '../store/useCodingLabStore';
 import { useAppStore } from '../store/useAppStore';
@@ -22,6 +22,8 @@ import {
 import { getContextualCodeSuggestion, type CodeSuggestionMode } from '../utils/codeSuggestionService';
 import CustomTestCaseBuilder from '../components/codingLab/CustomTestCaseBuilder';
 import CodingEngineDiagnosticsModal from '../components/codingLab/CodingEngineDiagnosticsModal';
+import LogicFormulationModal from '../components/codingLab/LogicFormulationModal';
+import { buildLogicGuide } from '../utils/logicFormulationGuide';
 import { getMentorAddress, formatOmHintIntro, formatOmErrorFeedback, isRidhimaProfile } from '../utils/mentorPersonalization';
 import { authService } from '../services/authService';
 
@@ -413,6 +415,7 @@ function ProblemWorkspace() {
   const [mobileTab, setMobileTab] = useState<'problem' | 'code' | 'console' | 'om'>('code');
   const [showSolutionConfirm, setShowSolutionConfirm] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [showLogicModal, setShowLogicModal] = useState(false);
   const [customInputMode, setCustomInputMode] = useState<'builder' | 'raw'>('builder');
   const currentUser = authService.getCurrentUser();
   const mentorSalutation = getMentorAddress(currentUser, 'hint');
@@ -759,6 +762,24 @@ function ProblemWorkspace() {
               </button>
             </div>
 
+            {/* OM Logic Formulation Callout & Guide Button */}
+            <div className="bg-surface-2 border border-accent-copper/35 rounded-[10px] p-3 space-y-2">
+              <div className="text-2xs font-semibold text-accent-copper flex items-center gap-1.5">
+                <Brain size={13} />
+                OM Logic Formulation Framework
+              </div>
+              <p className="text-2xs text-text-tertiary leading-relaxed">
+                Stuck on approach? Decode constraints, eliminate brute force TLE, and learn how to formulate optimal logic step-by-step.
+              </p>
+              <button
+                onClick={() => setShowLogicModal(true)}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-accent-copper text-black text-2xs font-semibold hover:bg-accent-copper/90 transition-all shadow-sm active:scale-95"
+              >
+                <Lightbulb size={12} />
+                Approach & Logic Formulate Karna Sikho
+              </button>
+            </div>
+
             {/* Description */}
             <div className="text-xs text-text-secondary leading-relaxed whitespace-pre-wrap">
               {problem.description}
@@ -919,6 +940,16 @@ function ProblemWorkspace() {
               className="flex items-center gap-1 px-3 py-1.5 rounded-full text-text-tertiary hover:text-text-primary text-xs transition-colors"
             >
               <RotateCcw size={12} /> Reset
+            </button>
+
+            {/* Approach & Logic Formulation Modal Trigger */}
+            <button
+              onClick={() => setShowLogicModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent-copper/15 hover:bg-accent-copper/25 text-accent-copper border border-accent-copper/35 text-xs font-semibold transition-all active:scale-95 shadow-sm"
+              title="Learn how to formulate approach and logic step-by-step with full sys.stdin solution"
+            >
+              <Brain size={12} />
+              <span>Logic Guide</span>
             </button>
 
             {/* Contextual Suggestion Mode Switcher */}
@@ -1441,22 +1472,45 @@ function ProblemWorkspace() {
                       Need full solution? (Try hints first)
                     </button>
                   ) : (
-                    <div className="bg-surface-2 border border-accent-green/30 rounded-[8px] p-3 space-y-2 animate-fade-in">
-                      <div className="text-2xs font-semibold text-accent-green flex items-center gap-1">
-                        <Check size={12} /> Solution Revealed
+                    <div className="bg-surface-2 border border-accent-green/30 rounded-[8px] p-3 space-y-2.5 animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xs font-semibold text-accent-green flex items-center gap-1">
+                          <Check size={12} /> Full Solution (sys.stdin.read().split())
+                        </div>
+                        <button
+                          onClick={() => setShowLogicModal(true)}
+                          className="text-3xs text-accent-copper hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <Brain size={10} /> Logic Guide
+                        </button>
                       </div>
-                      <pre className="font-mono text-3xs text-text-secondary bg-surface-0 p-2 rounded overflow-x-auto whitespace-pre-wrap">
-                        {problem.solutionCode?.[currentLanguage] || problem.structuredHints?.fullSolution || 'Solution available in solution tab.'}
+
+                      <div className="p-2 rounded bg-accent-blue/10 border border-accent-blue/20 text-3xs text-text-secondary leading-snug">
+                        <strong className="text-accent-blue">Token-based Stdin:</strong> Uses <code className="text-accent-copper font-mono">sys.stdin.read().split()</code> to eliminate EOFError and support all multiline layouts.
+                      </div>
+
+                      <pre className="font-mono text-3xs text-text-secondary bg-surface-0 p-2.5 rounded overflow-x-auto whitespace-pre-wrap max-h-56 leading-relaxed border border-border-subtle">
+                        {buildLogicGuide(problem).fullPythonSolution}
                       </pre>
-                      <button
-                        onClick={() => {
-                          const sol = problem.solutionCode?.[currentLanguage] || problem.structuredHints?.fullSolution;
-                          if (sol) setEditorCode(sol);
-                        }}
-                        className="px-2.5 py-1 rounded-full bg-surface-4 text-text-primary text-3xs hover:bg-surface-3 transition-colors"
-                      >
-                        Copy into Editor
-                      </button>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => {
+                            const sol = buildLogicGuide(problem).fullPythonSolution;
+                            setEditorCode(sol);
+                            soundManager.play('click');
+                          }}
+                          className="px-3 py-1 rounded-full bg-surface-4 text-text-primary text-3xs hover:bg-surface-3 transition-colors font-medium"
+                        >
+                          Copy into Editor
+                        </button>
+                        <button
+                          onClick={() => setShowLogicModal(true)}
+                          className="px-3 py-1 rounded-full bg-accent-copper text-black text-3xs hover:bg-accent-copper/90 transition-colors font-semibold shadow-sm"
+                        >
+                          Learn Logic Formation
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1465,6 +1519,18 @@ function ProblemWorkspace() {
           </div>
         </div>
       </div>
+
+      {/* Logic Formulation Modal */}
+      <LogicFormulationModal
+        isOpen={showLogicModal}
+        onClose={() => setShowLogicModal(false)}
+        problem={problem}
+        onInsertCode={setEditorCode}
+        onRunCode={(code) => {
+          setEditorCode(code);
+          runCode();
+        }}
+      />
 
       {/* Diagnostics Modal (Spec Section 12) */}
       <CodingEngineDiagnosticsModal

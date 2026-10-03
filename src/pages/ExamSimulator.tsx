@@ -60,9 +60,15 @@ export default function ExamSimulatorPage() {
       <div className="h-full overflow-y-auto px-4 sm:px-8 py-8 max-w-4xl mx-auto w-full flex flex-col justify-center">
         {/* Exam Start Screen */}
         <div className="p-8 sm:p-10 rounded-[10px] bg-carbon border border-border/60 text-center relative overflow-hidden">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-copper/10 border border-copper/30 text-copper text-xs font-mono tracking-wider uppercase mb-4">
-            <Clock className="w-3.5 h-3.5" />
-            90-Minute Timed Mock
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-copper/10 border border-copper/30 text-copper text-xs font-mono tracking-wider uppercase">
+              <Clock className="w-3.5 h-3.5" />
+              90-Minute Timed Mock
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+              <Sparkles className="w-3.5 h-3.5" />
+              Dynamic Questions Active (New Set Each Run)
+            </div>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-display font-semibold text-text-primary tracking-tight mb-3">
@@ -70,6 +76,9 @@ export default function ExamSimulatorPage() {
           </h1>
           <p className="text-sm sm:text-base text-text-secondary max-w-xl mx-auto mb-6">
             “90 minutes. 3 questions. Think before you code.”
+            <span className="block text-xs text-text-tertiary mt-1">
+              Har session mein 5 topics me se random naye questions select honge taaki real interview pressure develop ho.
+            </span>
           </p>
 
           {/* Known facts only */}
@@ -80,7 +89,7 @@ export default function ExamSimulatorPage() {
             </div>
             <div className="p-3.5 rounded-[10px] bg-graphite/40 border border-border/40">
               <span className="text-[10px] font-mono uppercase text-text-tertiary block">Questions</span>
-              <span className="text-base font-semibold text-text-primary mt-0.5 block font-mono">3 Original Tasks</span>
+              <span className="text-base font-semibold text-text-primary mt-0.5 block font-mono">3 Dynamic Tasks</span>
             </div>
             <div className="p-3.5 rounded-[10px] bg-graphite/40 border border-border/40">
               <span className="text-[10px] font-mono uppercase text-text-tertiary block">Environment</span>
@@ -123,8 +132,9 @@ export default function ExamSimulatorPage() {
 
           <button
             onClick={startExamSession}
-            className="px-8 py-3 rounded-full bg-copper text-black font-semibold text-sm hover:bg-copper/90 transition-all shadow-md active:scale-95"
+            className="px-8 py-3 rounded-full bg-copper text-black font-semibold text-sm hover:bg-copper/90 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 mx-auto"
           >
+            <Play className="w-4 h-4 fill-current" />
             START 90-MINUTE EXAM
           </button>
         </div>
@@ -153,16 +163,23 @@ export default function ExamSimulatorPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={startExamSession}
+                className="px-4 py-2 rounded-full bg-copper text-black font-semibold text-xs hover:bg-copper/90 transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Start New Exam (Different Questions)
+              </button>
               <button
                 onClick={resetExamSession}
                 className="px-4 py-2 rounded-full border border-border/60 text-xs text-text-secondary hover:text-text-primary transition-colors"
               >
-                Retake Mock Exam
+                Exit to Intro
               </button>
               <button
                 onClick={() => setCurrentPage('sirsheet')}
-                className="px-4 py-2 rounded-full bg-copper text-black font-semibold text-xs hover:bg-copper/90 transition-colors"
+                className="px-4 py-2 rounded-full bg-graphite/80 border border-border/60 text-text-primary font-medium text-xs hover:bg-graphite transition-colors"
               >
                 Sir's Practice Sheet
               </button>
@@ -393,6 +410,19 @@ export default function ExamSimulatorPage() {
             <Clock className="w-3.5 h-3.5" />
             <span>{formatTime(activeExamSession.remainingSeconds)}</span>
           </div>
+
+          <button
+            onClick={() => {
+              if (window.confirm("Start a new exam with 3 completely different questions? Current mock progress will be reset.")) {
+                startExamSession();
+              }
+            }}
+            className="px-3 py-1.5 rounded-full bg-graphite/60 hover:bg-graphite/80 text-text-secondary hover:text-text-primary border border-border/40 text-xs font-medium transition-colors flex items-center gap-1.5"
+            title="Generate 3 new random questions from the syllabus"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-copper" />
+            <span className="hidden sm:inline">Different Questions</span>
+          </button>
 
           <button
             onClick={() => setShowConfirmEnd(true)}

@@ -12,7 +12,7 @@ import {
   SirsSheetProblem, SirsSheetStatus, ExamSession, ExamSubmissionRecord
 } from '../types';
 import { sirsPracticeSheet } from '../data/sirsSheetData';
-import { defaultExamQuestions } from '../data/examQuestionsData';
+import { defaultExamQuestions, generateRandomExamQuestions } from '../data/examQuestionsData';
 import { soundManager } from '../utils/soundManager';
 import { triggerConfetti } from '../utils/confetti';
 import { normalizeProfileUrl } from '../utils/urlValidator';
@@ -169,6 +169,7 @@ interface AppState {
 
   // 90-Minute Exam Simulator
   activeExamSession: ExamSession | null;
+  lastExamQuestionIds: string[];
   startExamSession: () => void;
   setExamActiveQuestion: (index: number) => void;
   updateExamCode: (questionId: string, code: string) => void;
@@ -643,12 +644,15 @@ export const useAppStore = create<AppState>()(
         }));
       },
 
-      // 90-Minute Exam Simulator
+      // 90-Minute Exam Simulator (Dynamic Questions Selection)
       activeExamSession: null,
+      lastExamQuestionIds: [],
       startExamSession: () => {
+        const previousIds = get().activeExamSession?.questions.map(q => q.id) || get().lastExamQuestionIds || [];
+        const chosenQuestions = generateRandomExamQuestions(previousIds);
         const initialCodes: Record<string, string> = {};
         const initialInputs: Record<string, string> = {};
-        defaultExamQuestions.forEach(q => {
+        chosenQuestions.forEach(q => {
           initialCodes[q.id] = q.starterCode;
           initialInputs[q.id] = q.examples[0]?.input || '';
         });
@@ -660,7 +664,7 @@ export const useAppStore = create<AppState>()(
           remainingSeconds: 5400,
           status: 'in_progress',
           activeQuestionIndex: 0,
-          questions: defaultExamQuestions,
+          questions: chosenQuestions,
           codes: initialCodes,
           customInputs: initialInputs,
           submissions: {},
@@ -668,7 +672,10 @@ export const useAppStore = create<AppState>()(
         };
 
         soundManager.play('milestone');
-        set({ activeExamSession: newSession });
+        set({
+          activeExamSession: newSession,
+          lastExamQuestionIds: chosenQuestions.map(q => q.id),
+        });
       },
       setExamActiveQuestion: (index) => {
         set(state => state.activeExamSession ? ({
@@ -806,7 +813,11 @@ export const useAppStore = create<AppState>()(
         });
       },
       resetExamSession: () => {
-        set({ activeExamSession: null });
+        const prevIds = get().activeExamSession?.questions.map(q => q.id) || [];
+        set({
+          activeExamSession: null,
+          lastExamQuestionIds: prevIds.length > 0 ? prevIds : get().lastExamQuestionIds,
+        });
       },
 
       // Tech News Saved
@@ -847,6 +858,7 @@ export const useAppStore = create<AppState>()(
         leetcodeStats: state.leetcodeStats,
         sirsSheetProblems: state.sirsSheetProblems,
         activeExamSession: state.activeExamSession,
+        lastExamQuestionIds: state.lastExamQuestionIds,
         savedTechNewsIds: state.savedTechNewsIds,
       }),
       version: 4,
