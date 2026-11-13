@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import AutoBackupControls from './AutoBackupControls';
+import { disableAutoBackup } from '../../services/autoCloudBackup';
 import { cloudAccount, cloudLogin, cloudLogout, cloudSignup } from '../../services/cloudAuth';
 import { isSupabaseConfigured } from '../../services/supabaseConfig';
 import { fetchCloudWorkspace, uploadCloudWorkspace, restoreCloudWorkspace, exportLocalBackup, type RemoteWorkspace } from '../../services/cloudWorkspace';
@@ -46,6 +48,7 @@ export default function CloudBackupPanel() {
             placeholder="Cloud password" className="w-full p-2 rounded-lg bg-surface-3 text-text-primary text-sm border border-border-default" />
           <div className="flex gap-2 flex-wrap">
             <button className={button} disabled={busy || !email || !password} onClick={() => run(async () => {
+              disableAutoBackup();
               const user = await cloudLogin(email, password);
               setAccount(user.email || user.id);
               setPassword('');
@@ -76,6 +79,7 @@ export default function CloudBackupPanel() {
                 ? 'This will REPLACE your previous cloud backup. Keep a separate copy of important work. Continue?'
                 : 'Upload a backup of your local learning progress, code drafts, and applications to your cloud account?';
               if (!window.confirm(warning)) return;
+              disableAutoBackup();
               await uploadCloudWorkspace();
               setRemote(await fetchCloudWorkspace());
               setMessage('Cloud backup uploaded successfully.');
@@ -84,21 +88,24 @@ export default function CloudBackupPanel() {
               const existing = await fetchCloudWorkspace();
               if (!existing) throw new Error('No cloud backup found for this account.');
               if (!window.confirm('Restore cloud progress to this device? This can overwrite selected local progress. A local JSON backup will be downloaded first.')) return;
+              disableAutoBackup();
               restoreCloudWorkspace(existing.app_data);
             })}>Restore to this device</button>
             <button className={button} disabled={busy} onClick={() => run(async () => {
+              disableAutoBackup();
               await cloudLogout();
               setAccount(null);
               setRemote(null);
               setPassword('');
               setMessage('Signed out of cloud backup.');
             })}>Cloud sign out</button>
+          <AutoBackupControls />
           </div>
         </div>
       )}
       <button className={button} disabled={busy} onClick={exportLocalBackup}>Download local backup</button>
       {message && <p role="status" className="text-xs text-text-secondary">{message}</p>}
-      <p className="text-xs text-text-tertiary">Manual only: no automatic synchronization or merging across devices. Never upload credentials or secret keys.</p>
+      <p className="text-xs text-text-tertiary">Manual and optional experimental upload-only backup; no automatic merging or cloud-to-device synchronization. Never upload credentials or secret keys.</p>
     </div>
   );
 }

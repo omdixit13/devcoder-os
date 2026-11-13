@@ -5,6 +5,7 @@ import CommandPalette from './components/common/CommandPalette';
 import ProfileLoginModal from './components/common/ProfileLoginModal';
 import InteractiveBackground from './components/common/InteractiveBackground';
 import { useAppStore } from './store/useAppStore';
+import { resumeAutoBackup } from './services/autoCloudBackup';
 
 import MobileBottomNav from './components/layout/MobileBottomNav';
 
@@ -54,6 +55,10 @@ const pageComponents: Record<string, React.FC> = {
 export default function App() {
   const { currentPage, leetcodeProfileUrl, fetchLeetCodeStatsAction } = useAppStore();
   const PageComponent = pageComponents[currentPage] || HomePage;
+
+  useEffect(() => {
+    void resumeAutoBackup().catch(error => console.warn('Auto backup could not resume:', error));
+  }, []);
 
   useEffect(() => {
     if (leetcodeProfileUrl && fetchLeetCodeStatsAction) {
