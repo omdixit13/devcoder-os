@@ -11,6 +11,7 @@ import { triggerConfetti } from '../utils/confetti';
 import { normalizeProfileUrl } from '../utils/urlValidator';
 import { requestNotificationPermission, sendNotification } from '../utils/notificationService';
 import { authService, type AuthUser } from '../services/authService';
+import CloudBackupPanel from '../components/common/CloudBackupPanel';
 import { isRidhimaProfile } from '../utils/mentorPersonalization';
 import type { MentorAddressStyle } from '../types';
 
@@ -717,6 +718,7 @@ export default function SettingsPage() {
                   </button>
                 </SettingRow>
               </div>
+              <CloudBackupPanel />
             </div>
           )}
 
