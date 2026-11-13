@@ -51,9 +51,18 @@ function saveMarker(value: SyncMarker) {
 }
 
 // Non-cryptographic change detection. This is not an authentication token.
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+  if (value && typeof value === 'object') {
+    return '{' + Object.keys(value as Record<string, unknown>).sort()
+      .map(key => JSON.stringify(key) + ':' + stableStringify((value as Record<string, unknown>)[key])).join(',') + '}';
+  }
+  return JSON.stringify(value);
+}
+
 function fingerprint(): string {
   const snapshot = createLocalSnapshot();
-  const input = JSON.stringify([snapshot.app, snapshot.codingLab]);
+  const input = stableStringify([snapshot.app, snapshot.codingLab]);
   let hash = 2166136261;
   for (let i = 0; i < input.length; i++) {
     hash ^= input.charCodeAt(i);
@@ -198,13 +207,14 @@ async function attach(marker: SyncMarker): Promise<void> {
  * User must explicitly do a manual Backup or Restore first if they differ.
  */
 export async function enableAutoBackup(): Promise<void> {
+  disconnect(false);
   const user = await cloudAccount();
   if (!user) throw new Error('Sign in to Supabase before enabling automatic backup.');
   const remote = await fetchCloudWorkspace();
   if (!remote) throw new Error('Create your first manual cloud backup before enabling auto backup.');
   const local = createLocalSnapshot();
-  if (JSON.stringify([local.app, local.codingLab])
-      !== JSON.stringify([remote.app_data.app, remote.app_data.codingLab])) {
+  if (stableStringify([local.app, local.codingLab])
+      !== stableStringify([remote.app_data.app, remote.app_data.codingLab])) {
     throw new Error('Local and cloud data differ. First choose Backup to cloud or Restore to this device, then enable automatic backup.');
   }
   const marker: SyncMarker = {
@@ -215,6 +225,9 @@ export async function enableAutoBackup(): Promise<void> {
   };
   saveMarker(marker);
   await attach(marker);
+  if (status.phase === 'error' || status.phase === 'conflict') {
+    throw new Error(status.message);
+  }
 }
 
 export async function resumeAutoBackup(): Promise<void> {
